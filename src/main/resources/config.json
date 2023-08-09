@@ -1,0 +1,8 @@
+{
+  "type": "HTTP",
+  "localHost": "localhost",
+  "localPort": 4646,
+  "remoteHost": "localhost",
+  "remotePort": 8888,
+  "ssl": false
+}
