@@ -20,7 +20,6 @@ public class HTTPMetaInfo {
   private AtomicInteger txs = new AtomicInteger(-1);
   private String hash;
   private String dir;
-  private String command;
 
   private HTTPMetaInfo() {
   }
@@ -29,7 +28,6 @@ public class HTTPMetaInfo {
     this.type = type;
     contentLength = -1;
     chunked = false;
-    command = null;
   }
 
   public void incrementTxs() {

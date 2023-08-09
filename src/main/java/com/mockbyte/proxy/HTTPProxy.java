@@ -36,7 +36,7 @@ public final class HTTPProxy implements Proxy {
       meta.clearAsType(HTTPMetaInfo.Type.REQ);
       meta.incrementTxs();
       localStream.writeCommand();
-      log.info("REQ {}", meta);
+      log.info("REQ -> {}", meta);
       if (meta.isChunked()) {
         localStream.writeChunked();
       } else {
@@ -53,7 +53,7 @@ public final class HTTPProxy implements Proxy {
         } else {
           remoteStream.writeFixedLength();
         }
-        log.info("RES {}", meta);
+        log.info("RES <- {}", meta);
         recorder.close();
       }
     } catch (InterruptedException ex) {

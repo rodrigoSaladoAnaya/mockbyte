@@ -34,18 +34,20 @@ public class Server {
   }
 
   private void runProxy(Config config, Command command, Socket localSocket) {
-    Thread.ofVirtual().start(() -> {
-      log.info("Client connected on port [{}]", localSocket.getLocalPort());
-      try (
-        var remoteSocket = getRemoteSocket(config)
-      ) {
-        switch (config.getType()) {
-          case HTTP -> HTTPProxy.create(config, command, localSocket, remoteSocket);
+    Thread.ofVirtual()
+      .name("mockbyte-server-", 0)
+      .start(() -> {
+        log.info("Client connected on port [{}]", localSocket.getLocalPort());
+        try (
+          var remoteSocket = getRemoteSocket(config)
+        ) {
+          switch (config.getType()) {
+            case HTTP -> HTTPProxy.create(config, command, localSocket, remoteSocket);
+          }
+        } catch (IOException e) {
+          log.error("Error with the remote server [{}:{}]", config.getRemoteHost(), config.getRemotePort(), e);
         }
-      } catch (IOException e) {
-        log.error("Error with the remote server [{}:{}]", config.getRemoteHost(), config.getRemotePort(), e);
-      }
-    });
+      });
   }
 
   private Socket getRemoteSocket(Config config) throws IOException {

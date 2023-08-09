@@ -38,7 +38,6 @@ public class HTTPStream implements Closeable {
       line = processLine(line);
       command.append(line);
     }
-    meta.setCommand(command.toString());
     meta.setHash(HTTPRecorder.md5(meta.getStarLine()));
     output.write(command.toString().getBytes(StandardCharsets.UTF_8));
     output.flush();

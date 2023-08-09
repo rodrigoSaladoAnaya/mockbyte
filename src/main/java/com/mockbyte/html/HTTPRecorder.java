@@ -47,6 +47,7 @@ public class HTTPRecorder {
   public void newRecord() throws IOException {
     output = new FileOutputStream(getFile());
     Thread.ofVirtual()
+      .name("mockbyte-http-recorder-", 0)
       .start(() -> {
         try {
           while (true) {
@@ -54,6 +55,7 @@ public class HTTPRecorder {
             if (Arrays.equals(buffer, EXIT) && queue.isEmpty()) {
               break;
             }
+            log.trace("REC -> {}", Arrays.toString(buffer));
             output.write(buffer);
           }
         } catch (IOException | InterruptedException ex) {
