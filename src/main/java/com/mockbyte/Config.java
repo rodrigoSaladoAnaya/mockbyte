@@ -16,7 +16,7 @@ public class Config {
   public static final Logger log = LoggerFactory.getLogger(Config.class);
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  enum Type {HTTP, POSTGRESQL}
+  enum Type {HTTP, POSTGRESQL, ISO8583, GRPC}
 
   private Type type;
   private String localHost;
@@ -24,6 +24,7 @@ public class Config {
   private String remoteHost;
   private int remotePort;
   private boolean ssl;
+  private String mkbDir = "./out";
 
   public static Config fromPath(String path) {
     try {

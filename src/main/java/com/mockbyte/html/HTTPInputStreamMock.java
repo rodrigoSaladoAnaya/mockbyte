@@ -10,12 +10,10 @@ import java.io.InputStream;
 public class HTTPInputStreamMock extends InputStream {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
-  private final HTTPMetaInfo meta;
   private final HTTPRecorder recorder;
   private FileInputStream input;
 
-  public HTTPInputStreamMock(HTTPMetaInfo meta, HTTPRecorder recorder) {
-    this.meta = meta;
+  public HTTPInputStreamMock(HTTPRecorder recorder) {
     this.recorder = recorder;
   }
 

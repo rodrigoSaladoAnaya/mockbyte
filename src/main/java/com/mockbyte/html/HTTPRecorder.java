@@ -1,6 +1,7 @@
 package com.mockbyte.html;
 
 import com.mockbyte.Command;
+import com.mockbyte.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,25 +12,26 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
-import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class HTTPRecorder {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
+  private final Config config;
   private final HTTPMetaInfo meta;
   private final Command command;
   private FileOutputStream output;
   private final byte[] EXIT = {(byte) -1};
   private final LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
 
-  private HTTPRecorder(HTTPMetaInfo meta, Command command) {
+  private HTTPRecorder(Config config, HTTPMetaInfo meta, Command command) {
+    this.config = config;
     this.meta = meta;
     this.command = command;
   }
 
   public File getDir() {
-    meta.setDir(String.format("%s/%s/%s", "out", HTTPRecorder.dirName(meta.getRemoteHeaderHost()), meta.getHash()));
+    meta.setDir(String.format("%s/%s/%s", config.getMkbDir(), HTTPRecorder.dirName(meta.getRemoteHeaderHost()), meta.getHash()));
     var dir = new File(meta.getDir());
     if (!dir.exists()) {
       boolean mkdirs = dir.mkdirs();
@@ -72,8 +74,8 @@ public class HTTPRecorder {
     }
   }
 
-  public static HTTPRecorder create(HTTPMetaInfo meta, Command command) {
-    var instance = new HTTPRecorder(meta, command);
+  public static HTTPRecorder create(Config config, HTTPMetaInfo meta, Command command) {
+    var instance = new HTTPRecorder(config, meta, command);
     return instance;
   }
 

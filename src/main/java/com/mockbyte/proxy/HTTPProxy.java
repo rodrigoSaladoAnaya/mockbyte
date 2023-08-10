@@ -12,14 +12,12 @@ import java.net.Socket;
 public final class HTTPProxy implements Proxy {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
-  private final Command command;
   private final HTTPMetaInfo meta;
   private final Socket localSocket;
   private final Socket remoteSocket;
   private final HTTPRecorder recorder;
 
-  private HTTPProxy(HTTPMetaInfo meta, Command command, Socket localSocket, Socket remoteSocket, HTTPRecorder recorder) {
-    this.command = command;
+  private HTTPProxy(HTTPMetaInfo meta, Socket localSocket, Socket remoteSocket, HTTPRecorder recorder) {
     this.meta = meta;
     this.localSocket = localSocket;
     this.remoteSocket = remoteSocket;
@@ -60,7 +58,7 @@ public final class HTTPProxy implements Proxy {
   private void mock() throws IOException {
     try (
       var remoteOutput = new HTTPOutputStreamMock();
-      var remoteInput = new HTTPInputStreamMock(meta, recorder);
+      var remoteInput = new HTTPInputStreamMock(recorder);
       var localStream = new HTTPStream(meta, localSocket.getInputStream(), remoteOutput, recorder);
       var remoteStream = new HTTPStream(meta, remoteInput, localSocket.getOutputStream(), recorder);
     ) {
@@ -94,13 +92,12 @@ public final class HTTPProxy implements Proxy {
 
   public static void create(Config config, Command command, Socket localSocket, Socket remoteSocket) throws IOException {
     var meta = HTTPMetaInfo.create(config);
-    var recorder = HTTPRecorder.create(meta, command);
-    var instance = new HTTPProxy(meta, command, localSocket, remoteSocket, recorder);
+    var recorder = HTTPRecorder.create(config, meta, command);
+    var instance = new HTTPProxy(meta, localSocket, remoteSocket, recorder);
     switch (command) {
       case PROXY, RECORD -> instance.proxy();
       case MOCK -> instance.mock();
     }
-
   }
 
 }

@@ -4,5 +4,6 @@
   "localPort": 4646,
   "remoteHost": "localhost",
   "remotePort": 8888,
-  "ssl": false
+  "ssl": false,
+  "mkbDir": "/tmp/mkb/"
 }
