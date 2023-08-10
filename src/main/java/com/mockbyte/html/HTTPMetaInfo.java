@@ -21,15 +21,16 @@ public class HTTPMetaInfo {
   @ToString.Exclude
   private String dir;
   @ToString.Exclude
-  private AtomicInteger txs = new AtomicInteger(0);
+  private AtomicInteger txs = new AtomicInteger(-1);
 
   private HTTPMetaInfo() {
   }
 
-  public void clearAsType(Type type) {
+  public void reset(Type type) {
     this.type = type;
     contentLength = -1;
     chunked = false;
+    txs.getAndIncrement();
   }
 
   public static HTTPMetaInfo create(Config config) {

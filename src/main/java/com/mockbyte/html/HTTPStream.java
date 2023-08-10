@@ -78,10 +78,9 @@ public class HTTPStream implements Closeable {
     }
   }
 
-  public void stop() throws IOException, InterruptedException {
+  public void flush() throws IOException, InterruptedException {
     output.flush();
     recorder.stop();
-    meta.getTxs().getAndIncrement();
   }
 
   private boolean isLNCR() {

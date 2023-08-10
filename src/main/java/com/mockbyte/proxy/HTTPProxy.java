@@ -2,9 +2,7 @@ package com.mockbyte.proxy;
 
 import com.mockbyte.Command;
 import com.mockbyte.Config;
-import com.mockbyte.html.HTTPMetaInfo;
-import com.mockbyte.html.HTTPRecorder;
-import com.mockbyte.html.HTTPStream;
+import com.mockbyte.html.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +31,7 @@ public final class HTTPProxy implements Proxy {
       var localStream = new HTTPStream(meta, localSocket.getInputStream(), remoteSocket.getOutputStream(), recorder);
       var remoteStream = new HTTPStream(meta, remoteSocket.getInputStream(), localSocket.getOutputStream(), recorder);
     ) {
-      meta.clearAsType(HTTPMetaInfo.Type.REQ);
+      meta.reset(HTTPMetaInfo.Type.REQ);
       localStream.writeCommand();
       log.info("REQ -> {}", meta);
       if (meta.isChunked()) {
@@ -41,25 +39,57 @@ public final class HTTPProxy implements Proxy {
       } else {
         localStream.writeFixedLength();
       }
-      localStream.stop();
+      localStream.flush();
 
-      meta.clearAsType(HTTPMetaInfo.Type.RES);
-      while (meta.getContentLength() == -1) {
+      do {
+        meta.reset(HTTPMetaInfo.Type.RES);
         remoteStream.writeCommand();
         if (meta.isChunked()) {
           remoteStream.writeChunked();
         } else {
           remoteStream.writeFixedLength();
         }
-        localStream.stop();
+        remoteStream.flush();
         log.info("RES <- {}", meta);
-      }
+      } while (meta.getContentLength() == -1);
     } catch (InterruptedException ex) {
       log.error("Error during proxy", ex);
     }
   }
 
   private void mock() throws IOException {
+    try (
+      var remoteOutput = new HTTPOutputStreamMock();
+      var remoteInput = new HTTPInputStreamMock(meta, recorder);
+      var localStream = new HTTPStream(meta, localSocket.getInputStream(), remoteOutput, recorder);
+      var remoteStream = new HTTPStream(meta, remoteInput, localSocket.getOutputStream(), recorder);
+    ) {
+      meta.reset(HTTPMetaInfo.Type.REQ);
+      localStream.writeCommand();
+      log.info("REQ -> {}", meta);
+      if (meta.isChunked()) {
+        localStream.writeChunked();
+      } else {
+        localStream.writeFixedLength();
+      }
+      localStream.flush();
+
+      do {
+        remoteInput.mock();
+        meta.reset(HTTPMetaInfo.Type.RES);
+        remoteStream.writeCommand();
+        if (meta.isChunked()) {
+          remoteStream.writeChunked();
+        } else {
+          remoteStream.writeFixedLength();
+        }
+        remoteStream.flush();
+        remoteInput.close();
+        log.info("RES <- {}", meta);
+      } while (meta.getContentLength() == -1);
+    } catch (InterruptedException ex) {
+      log.error("Error during proxy", ex);
+    }
   }
 
   public static void create(Config config, Command command, Socket localSocket, Socket remoteSocket) throws IOException {

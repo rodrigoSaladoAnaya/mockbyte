@@ -23,13 +23,12 @@ public class HTTPRecorder {
   private final byte[] EXIT = {(byte) -1};
   private final LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
 
-
   private HTTPRecorder(HTTPMetaInfo meta, Command command) {
     this.meta = meta;
     this.command = command;
   }
 
-  private File getDir() {
+  public File getDir() {
     meta.setDir(String.format("%s/%s/%s", "out", HTTPRecorder.dirName(meta.getRemoteHeaderHost()), meta.getHash()));
     var dir = new File(meta.getDir());
     if (!dir.exists()) {
@@ -38,11 +37,24 @@ public class HTTPRecorder {
     return dir;
   }
 
-  private File getFile() throws IOException {
+  public String getFileName() {
+    return String.format("%s.%s", meta.getTxs(), "mkb");
+  }
+
+  public File createFileIfNotExist() throws IOException {
     var dir = getDir();
-    var file = new File(dir, String.format("%s_%s", meta.getTxs(), meta.getType()));
+    var file = new File(dir, getFileName());
     if (!file.exists()) {
       boolean newFile = file.createNewFile();
+    }
+    return file;
+  }
+
+  public File getFile() {
+    var dir = getDir();
+    var file = new File(dir, getFileName());
+    if (!file.exists()) {
+      throw new RuntimeException(String.format("File does not exist [%s], first run RECORD", file));
     }
     return file;
   }
@@ -51,7 +63,7 @@ public class HTTPRecorder {
     if (command != Command.RECORD) {
       return;
     }
-    output = new FileOutputStream(getFile());
+    output = new FileOutputStream(createFileIfNotExist());
     Thread.ofVirtual()
       .name("mockbyte-http-recorder-", 0)
       .start(() -> {
