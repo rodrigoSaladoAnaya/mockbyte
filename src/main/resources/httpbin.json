@@ -1,0 +1,8 @@
+{
+  "type": "HTTP",
+  "localHost": "localhost",
+  "localPort": 4646,
+  "remoteHost": "httpbin.org",
+  "remotePort": 443,
+  "ssl": true
+}

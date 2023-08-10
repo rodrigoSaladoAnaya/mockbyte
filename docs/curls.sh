@@ -1,0 +1,1 @@
+curl -X DELETE "http://localhost:4646/delete" -H "accept: application/json"

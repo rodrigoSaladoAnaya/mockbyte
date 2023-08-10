@@ -144,7 +144,7 @@ public class HTTPStream implements Closeable {
   }
 
   private String processLine(String line) {
-    if (Stream.of("post", "get", "put").anyMatch(method -> line.toLowerCase().startsWith(method))) {
+    if (Stream.of("post", "get", "put", "delete", "patch").anyMatch(method -> line.toLowerCase().startsWith(method))) {
       meta.setStarLine(line.trim());
       meta.setHash(HTTPRecorder.md5(line.trim()));
     }
