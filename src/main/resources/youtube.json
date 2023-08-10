@@ -1,8 +1,0 @@
-{
-  "type": "HTTP",
-  "localHost": "localhost",
-  "localPort": 4646,
-  "remoteHost": "www.youtube.com",
-  "remotePort": 443,
-  "ssl": true
-}

@@ -29,7 +29,7 @@ public class HTTPInputStreamMock extends InputStream {
     }
     input = new FileInputStream(file);
     log.info("MOCK_FILE -> [{}]", file.getPath());
-    for (var mf : config.getMkbFiles()) {
+    for (var mf : config.getMockFiles()) {
       if (file.getPath().endsWith(mf.getPath())) {
         log.info("MOCK_DELAY -> {}ms", mf.getDelay());
         TimeUnit.MILLISECONDS.sleep(mf.getDelay());

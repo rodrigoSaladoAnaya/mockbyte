@@ -27,7 +27,7 @@ public class Config {
   private int remotePort;
   private boolean ssl;
   private String mkbDir = "./out";
-  private List<MKBFile> mkbFiles = new ArrayList<>();
+  private List<MockFile> mockFiles = new ArrayList<>();
 
   public static Config fromPath(String path) {
     try {
