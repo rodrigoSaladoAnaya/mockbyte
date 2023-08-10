@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class HTTPStream implements Closeable {
@@ -38,11 +41,9 @@ public class HTTPStream implements Closeable {
       line = processLine(line);
       command.append(line);
     }
-    meta.setHash(HTTPRecorder.md5(meta.getStarLine()));
-    output.write(command.toString().getBytes(StandardCharsets.UTF_8));
-    output.flush();
-    recorder.newRecord();
-    recorder.save(command.toString().getBytes(StandardCharsets.UTF_8));
+    var buffer = command.toString().getBytes(StandardCharsets.UTF_8);
+    recorder.start();
+    write(buffer);
   }
 
   public String readLine() throws IOException {
@@ -62,11 +63,9 @@ public class HTTPStream implements Closeable {
     var buffer = new byte[size];
     while (!isEOF()) {
       var read = input.read(buffer);
-      output.write(buffer, 0, read);
-      recorder.save(buffer, 0, read);
+      write(buffer, 0, read);
       addTail(buffer, read);
     }
-    output.flush();
   }
 
   public void writeFixedLength() throws IOException {
@@ -74,13 +73,16 @@ public class HTTPStream implements Closeable {
     var buffer = new byte[size];
     while (total < meta.getContentLength()) {
       var read = input.read(buffer);
-      output.write(buffer, 0, read);
-      recorder.save(buffer, 0, read);
+      write(buffer, 0, read);
       total += read;
     }
-    output.flush();
   }
 
+  public void stop() throws IOException, InterruptedException {
+    output.flush();
+    recorder.stop();
+    meta.getTxs().getAndIncrement();
+  }
 
   private boolean isLNCR() {
     return lncr.toString().equals("[13, 10]");
@@ -140,7 +142,8 @@ public class HTTPStream implements Closeable {
 
   private String processLine(String line) {
     if (Stream.of("post", "get", "put").anyMatch(method -> line.toLowerCase().startsWith(method))) {
-      meta.setStarLine(line);
+      meta.setStarLine(line.trim());
+      meta.setHash(HTTPRecorder.md5(line.trim()));
     }
     if (line.toLowerCase().startsWith("host: ")) {
       return line.replaceFirst(meta.getLocalHeaderHost(), meta.getRemoteHeaderHost());
@@ -158,6 +161,15 @@ public class HTTPStream implements Closeable {
     System.out.printf("\nlncr (%s)-> %s\n", lncr.size(), lncr);
     System.out.printf("\nlec (%s)-> %s\n", lec.size(), lec);
     System.out.printf("\neof (%s)-> %s\n", eof.size(), eof);
+  }
+
+  private void write(byte[] buffer) throws IOException {
+    write(buffer, 0, buffer.length);
+  }
+
+  private void write(byte[] buffer, int off, int len) throws IOException {
+    output.write(buffer, off, len);
+    recorder.write(buffer, off, len);
   }
 
   @Override

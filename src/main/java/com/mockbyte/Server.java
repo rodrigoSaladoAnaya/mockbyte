@@ -62,7 +62,6 @@ public class Server {
     }
   }
 
-
   private static void create(String[] args) throws IOException {
     var config = Config.fromPath(args[0]);
     var command = Command.valueOf(args[1]);

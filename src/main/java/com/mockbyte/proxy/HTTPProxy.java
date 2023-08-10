@@ -34,7 +34,6 @@ public final class HTTPProxy implements Proxy {
       var remoteStream = new HTTPStream(meta, remoteSocket.getInputStream(), localSocket.getOutputStream(), recorder);
     ) {
       meta.clearAsType(HTTPMetaInfo.Type.REQ);
-      meta.incrementTxs();
       localStream.writeCommand();
       log.info("REQ -> {}", meta);
       if (meta.isChunked()) {
@@ -42,19 +41,18 @@ public final class HTTPProxy implements Proxy {
       } else {
         localStream.writeFixedLength();
       }
-      recorder.close();
+      localStream.stop();
 
       meta.clearAsType(HTTPMetaInfo.Type.RES);
       while (meta.getContentLength() == -1) {
-        meta.incrementTxs();
         remoteStream.writeCommand();
         if (meta.isChunked()) {
           remoteStream.writeChunked();
         } else {
           remoteStream.writeFixedLength();
         }
+        localStream.stop();
         log.info("RES <- {}", meta);
-        recorder.close();
       }
     } catch (InterruptedException ex) {
       log.error("Error during proxy", ex);
@@ -66,7 +64,7 @@ public final class HTTPProxy implements Proxy {
 
   public static void create(Config config, Command command, Socket localSocket, Socket remoteSocket) throws IOException {
     var meta = HTTPMetaInfo.create(config);
-    var recorder = HTTPRecorder.create(meta);
+    var recorder = HTTPRecorder.create(meta, command);
     var instance = new HTTPProxy(meta, command, localSocket, remoteSocket, recorder);
     switch (command) {
       case PROXY, RECORD -> instance.proxy();

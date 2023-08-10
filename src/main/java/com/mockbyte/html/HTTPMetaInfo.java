@@ -17,9 +17,11 @@ public class HTTPMetaInfo {
   private String starLine;
   private boolean chunked;
   private int contentLength = -1;
-  private AtomicInteger txs = new AtomicInteger(-1);
   private String hash;
+  @ToString.Exclude
   private String dir;
+  @ToString.Exclude
+  private AtomicInteger txs = new AtomicInteger(0);
 
   private HTTPMetaInfo() {
   }
@@ -28,10 +30,6 @@ public class HTTPMetaInfo {
     this.type = type;
     contentLength = -1;
     chunked = false;
-  }
-
-  public void incrementTxs() {
-    txs.incrementAndGet();
   }
 
   public static HTTPMetaInfo create(Config config) {

@@ -1,5 +1,6 @@
 package com.mockbyte.html;
 
+import com.mockbyte.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +18,15 @@ public class HTTPRecorder {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
   private final HTTPMetaInfo meta;
+  private final Command command;
   private FileOutputStream output;
   private final byte[] EXIT = {(byte) -1};
   private final LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
 
 
-  private HTTPRecorder(HTTPMetaInfo meta) {
+  private HTTPRecorder(HTTPMetaInfo meta, Command command) {
     this.meta = meta;
+    this.command = command;
   }
 
   private File getDir() {
@@ -35,7 +38,7 @@ public class HTTPRecorder {
     return dir;
   }
 
-  public File getFile() throws IOException {
+  private File getFile() throws IOException {
     var dir = getDir();
     var file = new File(dir, String.format("%s_%s", meta.getTxs(), meta.getType()));
     if (!file.exists()) {
@@ -44,7 +47,10 @@ public class HTTPRecorder {
     return file;
   }
 
-  public void newRecord() throws IOException {
+  public void start() throws IOException {
+    if (command != Command.RECORD) {
+      return;
+    }
     output = new FileOutputStream(getFile());
     Thread.ofVirtual()
       .name("mockbyte-http-recorder-", 0)
@@ -64,23 +70,24 @@ public class HTTPRecorder {
       });
   }
 
-  public void save(byte[] buffer) {
-    save(buffer, 0, buffer.length);
-  }
-
-  public void save(byte[] buffer, int off, int read) {
+  public void write(byte[] buffer, int off, int read) {
+    if (command != Command.RECORD) {
+      return;
+    }
     byte[] bytes = new byte[read];
     System.arraycopy(buffer, off, bytes, 0, read);
-    //log.info("SAVE: ({}) {} -> {}", meta.getType(), meta.getTxs(), Arrays.toString(bytes));
     queue.add(bytes);
   }
 
-  public void close() throws InterruptedException {
+  public void stop() throws InterruptedException {
+    if (command != Command.RECORD) {
+      return;
+    }
     queue.put(EXIT);
   }
 
-  public static HTTPRecorder create(HTTPMetaInfo meta) {
-    var instance = new HTTPRecorder(meta);
+  public static HTTPRecorder create(HTTPMetaInfo meta, Command command) {
+    var instance = new HTTPRecorder(meta, command);
     return instance;
   }
 
