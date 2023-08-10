@@ -61,10 +61,15 @@ public class HTTPStream implements Closeable {
   public void writeChunked() throws IOException {
     eof.clear();
     var buffer = new byte[size];
+    var contentLength = 0;
     while (!isEOF()) {
       var read = input.read(buffer);
+      contentLength += read;
       write(buffer, 0, read);
       addTail(buffer, read);
+    }
+    if (meta.getContentLength() == -1) {
+      meta.setContentLength(contentLength);
     }
   }
 
