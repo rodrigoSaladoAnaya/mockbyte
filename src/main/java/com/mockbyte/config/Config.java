@@ -1,4 +1,4 @@
-package com.mockbyte;
+package com.mockbyte.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @ToString
@@ -16,7 +18,7 @@ public class Config {
   public static final Logger log = LoggerFactory.getLogger(Config.class);
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  enum Type {HTTP, POSTGRESQL, ISO8583, GRPC}
+  public enum Type {HTTP, POSTGRESQL, ISO8583, GRPC}
 
   private Type type;
   private String localHost;
@@ -25,6 +27,7 @@ public class Config {
   private int remotePort;
   private boolean ssl;
   private String mkbDir = "./out";
+  private List<MKBFile> mkbFiles = new ArrayList<>();
 
   public static Config fromPath(String path) {
     try {
@@ -40,4 +43,5 @@ public class Config {
       throw new RuntimeException(e);
     }
   }
+
 }

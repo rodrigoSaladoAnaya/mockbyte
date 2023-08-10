@@ -42,6 +42,9 @@ public class HTTPStream implements Closeable {
       command.append(line);
     }
     var buffer = command.toString().getBytes(StandardCharsets.UTF_8);
+    if(meta.getType() == HTTPMetaInfo.Type.REQ) {
+      meta.setHash(HTTPRecorder.md5(command.toString()));
+    }
     recorder.start();
     write(buffer);
   }
@@ -146,7 +149,6 @@ public class HTTPStream implements Closeable {
   private String processLine(String line) {
     if (Stream.of("post", "get", "put", "delete", "patch").anyMatch(method -> line.toLowerCase().startsWith(method))) {
       meta.setStarLine(line.trim());
-      meta.setHash(HTTPRecorder.md5(line.trim()));
     }
     if (line.toLowerCase().startsWith("host: ")) {
       return line.replaceFirst(meta.getLocalHeaderHost(), meta.getRemoteHeaderHost());

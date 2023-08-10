@@ -1,7 +1,7 @@
 package com.mockbyte.html;
 
 import com.mockbyte.Command;
-import com.mockbyte.Config;
+import com.mockbyte.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

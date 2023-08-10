@@ -1,7 +1,7 @@
 package com.mockbyte.proxy;
 
 import com.mockbyte.Command;
-import com.mockbyte.Config;
+import com.mockbyte.config.Config;
 import com.mockbyte.html.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +12,14 @@ import java.net.Socket;
 public final class HTTPProxy implements Proxy {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
+  private final Config config;
   private final HTTPMetaInfo meta;
   private final Socket localSocket;
   private final Socket remoteSocket;
   private final HTTPRecorder recorder;
 
-  private HTTPProxy(HTTPMetaInfo meta, Socket localSocket, Socket remoteSocket, HTTPRecorder recorder) {
+  private HTTPProxy(Config config, HTTPMetaInfo meta, Socket localSocket, Socket remoteSocket, HTTPRecorder recorder) {
+    this.config = config;
     this.meta = meta;
     this.localSocket = localSocket;
     this.remoteSocket = remoteSocket;
@@ -48,7 +50,7 @@ public final class HTTPProxy implements Proxy {
           remoteStream.writeFixedLength();
         }
         remoteStream.flush();
-        log.info("RES <- {}", meta);
+        log.info("RES -> {}", meta);
       } while (meta.getContentLength() == -1);
     } catch (InterruptedException ex) {
       log.error("Error during proxy", ex);
@@ -58,7 +60,7 @@ public final class HTTPProxy implements Proxy {
   private void mock() throws IOException {
     try (
       var remoteOutput = new HTTPOutputStreamMock();
-      var remoteInput = new HTTPInputStreamMock(recorder);
+      var remoteInput = new HTTPInputStreamMock(config, recorder);
       var localStream = new HTTPStream(meta, localSocket.getInputStream(), remoteOutput, recorder);
       var remoteStream = new HTTPStream(meta, remoteInput, localSocket.getOutputStream(), recorder);
     ) {
@@ -83,7 +85,7 @@ public final class HTTPProxy implements Proxy {
         }
         remoteStream.flush();
         remoteInput.close();
-        log.info("RES <- {}", meta);
+        log.info("RES -> {}", meta);
       } while (meta.getContentLength() == -1);
     } catch (InterruptedException ex) {
       log.error("Error during proxy", ex);
@@ -93,7 +95,7 @@ public final class HTTPProxy implements Proxy {
   public static void create(Config config, Command command, Socket localSocket, Socket remoteSocket) throws IOException {
     var meta = HTTPMetaInfo.create(config);
     var recorder = HTTPRecorder.create(config, meta, command);
-    var instance = new HTTPProxy(meta, localSocket, remoteSocket, recorder);
+    var instance = new HTTPProxy(config, meta, localSocket, remoteSocket, recorder);
     switch (command) {
       case PROXY, RECORD -> instance.proxy();
       case MOCK -> instance.mock();

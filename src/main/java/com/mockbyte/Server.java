@@ -1,5 +1,6 @@
 package com.mockbyte;
 
+import com.mockbyte.config.Config;
 import com.mockbyte.proxy.HTTPProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,13 @@ public class Server {
         ) {
           switch (config.getType()) {
             case HTTP -> HTTPProxy.create(config, command, localSocket, remoteSocket);
+            case POSTGRESQL -> {
+            }
+            case ISO8583 -> {
+            }
+            case GRPC -> {
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + config.getType());
           }
         } catch (IOException e) {
           log.error("Error with the remote server [{}:{}]", config.getRemoteHost(), config.getRemotePort(), e);

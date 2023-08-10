@@ -1,6 +1,6 @@
 package com.mockbyte.html;
 
-import com.mockbyte.Config;
+import com.mockbyte.config.Config;
 import lombok.Data;
 import lombok.ToString;
 

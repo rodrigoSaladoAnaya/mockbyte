@@ -1,30 +1,40 @@
 package com.mockbyte.html;
 
+import com.mockbyte.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 public class HTTPInputStreamMock extends InputStream {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
+  private final Config config;
   private final HTTPRecorder recorder;
   private FileInputStream input;
 
-  public HTTPInputStreamMock(HTTPRecorder recorder) {
+  public HTTPInputStreamMock(Config config, HTTPRecorder recorder) {
+    this.config = config;
     this.recorder = recorder;
   }
 
-  public void mock() throws IOException {
-    log.info("MOCK <- {}", recorder.getFile());
+  public void mock() throws IOException, InterruptedException {
     var file = recorder.getFile();
     if (!file.exists()) {
       log.error("First run RECORD");
       return;
     }
     input = new FileInputStream(file);
+    log.info("MOCK_FILE -> [{}]", file.getPath());
+    for (var mf : config.getMkbFiles()) {
+      if (file.getPath().endsWith(mf.getPath())) {
+        log.info("MOCK_DELAY -> {}ms", mf.getDelay());
+        TimeUnit.MILLISECONDS.sleep(mf.getDelay());
+      }
+    }
   }
 
   @Override
