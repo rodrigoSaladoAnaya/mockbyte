@@ -75,8 +75,8 @@ public final class HTTPProxy implements Proxy {
       localStream.flush();
 
       do {
-        remoteInput.mock();
         meta.reset(HTTPMetaInfo.Type.RES);
+        remoteInput.mock();
         remoteStream.writeCommand();
         if (meta.isChunked()) {
           remoteStream.writeChunked();

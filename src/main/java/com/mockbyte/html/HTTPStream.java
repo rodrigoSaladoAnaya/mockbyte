@@ -80,7 +80,6 @@ public class HTTPStream implements Closeable {
 
   public void flush() throws IOException, InterruptedException {
     output.flush();
-    recorder.stop();
   }
 
   private boolean isLNCR() {

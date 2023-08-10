@@ -39,7 +39,7 @@ public class Server {
       .start(() -> {
         log.info("Client connected on port [{}]", localSocket.getLocalPort());
         try (
-          var remoteSocket = getRemoteSocket(config)
+          var remoteSocket = getRemoteSocket(config, command)
         ) {
           switch (config.getType()) {
             case HTTP -> HTTPProxy.create(config, command, localSocket, remoteSocket);
@@ -50,7 +50,10 @@ public class Server {
       });
   }
 
-  private Socket getRemoteSocket(Config config) throws IOException {
+  private Socket getRemoteSocket(Config config, Command command) throws IOException {
+    if (command == Command.MOCK) {
+      return null;
+    }
     if (config.isSsl()) {
       var socketFactory = SSLSocketFactory.getDefault();
       var socket = (SSLSocket) socketFactory.createSocket(config.getRemoteHost(), config.getRemotePort());

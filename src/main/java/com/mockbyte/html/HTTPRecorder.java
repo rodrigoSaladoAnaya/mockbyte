@@ -64,38 +64,12 @@ public class HTTPRecorder {
       return;
     }
     output = new FileOutputStream(createFileIfNotExist());
-    Thread.ofVirtual()
-      .name("mockbyte-http-recorder-", 0)
-      .start(() -> {
-        try {
-          while (true) {
-            byte[] buffer = queue.take();
-            if (Arrays.equals(buffer, EXIT) && queue.isEmpty()) {
-              break;
-            }
-            log.trace("REC -> {}", Arrays.toString(buffer));
-            output.write(buffer);
-          }
-        } catch (IOException | InterruptedException ex) {
-          log.error("Error during recording", ex);
-        }
-      });
   }
 
-  public void write(byte[] buffer, int off, int read) {
-    if (command != Command.RECORD) {
-      return;
+  public void write(byte[] buffer, int off, int len) throws IOException {
+    if (command == Command.RECORD) {
+      output.write(buffer, off, len);
     }
-    byte[] bytes = new byte[read];
-    System.arraycopy(buffer, off, bytes, 0, read);
-    queue.add(bytes);
-  }
-
-  public void stop() throws InterruptedException {
-    if (command != Command.RECORD) {
-      return;
-    }
-    queue.put(EXIT);
   }
 
   public static HTTPRecorder create(HTTPMetaInfo meta, Command command) {

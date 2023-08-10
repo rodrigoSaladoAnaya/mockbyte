@@ -20,14 +20,23 @@ public class HTTPInputStreamMock extends InputStream {
   }
 
   public void mock() throws IOException {
-    meta.getTxs().incrementAndGet();
-    log.info("2) >>> {}", recorder.getFile());
+    log.info("MOCK <- {}", recorder.getFile());
     var file = recorder.getFile();
     if (!file.exists()) {
       log.error("First run RECORD");
       return;
     }
     input = new FileInputStream(file);
+  }
+
+  @Override
+  public int read(byte[] b, int off, int len) throws IOException {
+    return input.read(b, 0, b.length);
+  }
+
+  @Override
+  public int read(byte[] b) throws IOException {
+    return input.read(b);
   }
 
   @Override
