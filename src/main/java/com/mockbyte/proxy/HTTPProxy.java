@@ -39,7 +39,7 @@ public final class HTTPProxy implements Proxy {
       } else {
         localStream.writeFixedLength();
       }
-      localStream.flush();
+      localStream.endTx();
 
       do {
         meta.reset(HTTPMetaInfo.Type.RES);
@@ -49,7 +49,7 @@ public final class HTTPProxy implements Proxy {
         } else {
           remoteStream.writeFixedLength();
         }
-        remoteStream.flush();
+        remoteStream.endTx();
         log.info("RES -> {}", meta);
       } while (meta.getContentLength() == -1);
     } catch (InterruptedException ex) {
@@ -72,7 +72,7 @@ public final class HTTPProxy implements Proxy {
       } else {
         localStream.writeFixedLength();
       }
-      localStream.flush();
+      localStream.endTx();
 
       do {
         meta.reset(HTTPMetaInfo.Type.RES);
@@ -83,7 +83,7 @@ public final class HTTPProxy implements Proxy {
         } else {
           remoteStream.writeFixedLength();
         }
-        remoteStream.flush();
+        remoteStream.endTx();
         remoteInput.close();
         log.info("RES -> {}", meta);
       } while (meta.getContentLength() == -1);

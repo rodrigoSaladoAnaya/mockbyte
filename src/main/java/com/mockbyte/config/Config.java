@@ -16,7 +16,7 @@ import java.util.List;
 public class Config {
 
   public static final Logger log = LoggerFactory.getLogger(Config.class);
-  private static final ObjectMapper objectMapper = new ObjectMapper();
+  public static final ObjectMapper objectMapper = new ObjectMapper();
 
   public enum Type {HTTP, POSTGRESQL, ISO8583, GRPC}
 
@@ -27,7 +27,6 @@ public class Config {
   private int remotePort;
   private boolean ssl;
   private String mockDir = "./mkb";
-  private List<MockFile> mockFiles = new ArrayList<>();
 
   public static Config fromPath(String path) {
     try {

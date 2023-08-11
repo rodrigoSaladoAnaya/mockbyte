@@ -4,9 +4,11 @@ import com.mockbyte.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
 public class HTTPInputStreamMock extends InputStream {
@@ -28,12 +30,13 @@ public class HTTPInputStreamMock extends InputStream {
       return;
     }
     input = new FileInputStream(file);
-    log.info("MOCK_FILE -> [{}]", file.getPath());
-    for (var mf : config.getMockFiles()) {
-      if (file.getPath().endsWith(mf.getPath())) {
-        log.info("MOCK_DELAY -> {}ms", mf.getDelay());
-        TimeUnit.MILLISECONDS.sleep(mf.getDelay());
-      }
+    var mockMetaFile = new File(String.format("%s_%s", file.getPath(), "meta"));
+    if (mockMetaFile.exists()) {
+      log.info("MOCK_FILE -> [{}]", mockMetaFile);
+      HTTPMBKMeta metaConfig = Config.objectMapper.readValue(mockMetaFile, HTTPMBKMeta.class);
+      log.info("Meta Config -> {}", config);
+      log.info("MOCK_DELAY -> {}", metaConfig.getElapsed());
+      TimeUnit.MILLISECONDS.sleep(metaConfig.getElapsed());
     }
   }
 

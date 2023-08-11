@@ -7,6 +7,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class HTTPStream implements Closeable {
   }
 
   public void writeCommand() throws IOException {
+    recorder.setTxTime(System.currentTimeMillis());
     lec.clear();
     var command = new StringBuilder();
     while (!isLEC()) {
@@ -90,8 +92,9 @@ public class HTTPStream implements Closeable {
     }
   }
 
-  public void flush() throws IOException, InterruptedException {
+  public void endTx() throws IOException, InterruptedException {
     output.flush();
+    recorder.endTx();
   }
 
   private boolean isLNCR() {
@@ -160,10 +163,10 @@ public class HTTPStream implements Closeable {
     if (line.toLowerCase().startsWith("content-length:")) {
       meta.setContentLength(Integer.parseInt(line.substring(line.indexOf(':') + 1).trim()));
     }
-    if (line.toLowerCase().startsWith("host: ")) {
+    if (line.toLowerCase().startsWith("host:")) {
       return line.replaceFirst(meta.getLocalHeaderHost(), meta.getRemoteHeaderHost());
     }
-    if (line.toLowerCase().startsWith("x-mockbyte")) {
+    if (line.toLowerCase().startsWith("x-mockbyte:")) {
       meta.setMkbHeader(line.substring(line.indexOf(':') + 1).trim());
       return "";
     }
@@ -181,8 +184,19 @@ public class HTTPStream implements Closeable {
   }
 
   private void write(byte[] buffer, int off, int len) throws IOException {
-    output.write(buffer, off, len);
-    recorder.write(buffer, off, len);
+    try {
+      output.write(buffer, off, len);
+      recorder.write(buffer, off, len);
+    } catch (SocketException cause) {
+      log.info("1Wowowowowowoowowow : ASDFASDFASDF");
+      recorder.endTx();
+      throw cause;
+    } catch (IOException cause) {
+      log.info("2Wowowowowowoowowow : ASDFASDFASDF");
+      recorder.endTx();
+      throw cause;
+    }
+
   }
 
   @Override

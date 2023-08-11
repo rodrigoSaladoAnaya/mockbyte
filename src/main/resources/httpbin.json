@@ -4,11 +4,5 @@
   "localPort": 4646,
   "remoteHost": "httpbin.org",
   "remotePort": 443,
-  "ssl": true,
-  "mockFiles": [
-    {
-      "path": "29da7d7fa344a468bd3f8db24efc4466/1.mkb",
-      "delay": 7000
-    }
-  ]
+  "ssl": true
 }

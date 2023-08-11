@@ -38,7 +38,7 @@ public class Server {
     Thread.ofVirtual()
       .name("mockbyte-server-", 0)
       .start(() -> {
-        log.info("Client connected on port [{}]", localSocket.getLocalPort());
+        log.info("Client connected on port [{}]", localSocket.getPort());
         try (
           var remoteSocket = getRemoteSocket(config, command)
         ) {

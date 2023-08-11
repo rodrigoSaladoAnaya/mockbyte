@@ -2,6 +2,8 @@ package com.mockbyte.html;
 
 import com.mockbyte.Command;
 import com.mockbyte.config.Config;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,10 +11,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class HTTPRecorder {
 
@@ -21,8 +23,9 @@ public class HTTPRecorder {
   private final HTTPMetaInfo meta;
   private final Command command;
   private FileOutputStream output;
-  private final byte[] EXIT = {(byte) -1};
-  private final LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
+  @Getter
+  @Setter
+  private long txTime;
 
   private HTTPRecorder(Config config, HTTPMetaInfo meta, Command command) {
     this.config = config;
@@ -65,13 +68,23 @@ public class HTTPRecorder {
     if (command != Command.RECORD) {
       return;
     }
-    output = new FileOutputStream(createFileIfNotExist());
+    var file = createFileIfNotExist();
+    output = new FileOutputStream(file);
   }
 
   public void write(byte[] buffer, int off, int len) throws IOException {
     if (command == Command.RECORD) {
       output.write(buffer, off, len);
     }
+  }
+
+  public void endTx() throws IOException {
+    long time = System.currentTimeMillis() - txTime;
+    var file = new File(getDir(), String.format("%s_%s", getFileName(), "meta"));
+    log.info("END {} -> {}", getFile().getPath(), time);
+    var json = Config.objectMapper.createObjectNode();
+    json.put("elapsed", time);
+    Files.write(file.toPath(), json.toString().getBytes(StandardCharsets.UTF_8));
   }
 
   public static HTTPRecorder create(Config config, HTTPMetaInfo meta, Command command) {
