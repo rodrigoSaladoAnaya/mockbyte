@@ -17,6 +17,7 @@ public class HTTPMetaInfo {
   private String starLine;
   private boolean chunked;
   private int contentLength = -1;
+  private String mkbHeader;
   private String hash;
   @ToString.Exclude
   private String dir;

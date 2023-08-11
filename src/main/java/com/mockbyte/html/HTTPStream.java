@@ -42,8 +42,12 @@ public class HTTPStream implements Closeable {
       command.append(line);
     }
     var buffer = command.toString().getBytes(StandardCharsets.UTF_8);
-    if(meta.getType() == HTTPMetaInfo.Type.REQ) {
-      meta.setHash(HTTPRecorder.md5(command.toString()));
+    if (meta.getType() == HTTPMetaInfo.Type.REQ) {
+      if (meta.getMkbHeader() != null && !meta.getMkbHeader().isEmpty()) {
+        meta.setHash(HTTPRecorder.normalize(meta.getMkbHeader()));
+      } else {
+        meta.setHash(HTTPRecorder.md5(command.toString()));
+      }
     }
     recorder.start();
     write(buffer);
@@ -150,14 +154,18 @@ public class HTTPStream implements Closeable {
     if (Stream.of("post", "get", "put", "delete", "patch").anyMatch(method -> line.toLowerCase().startsWith(method))) {
       meta.setStarLine(line.trim());
     }
-    if (line.toLowerCase().startsWith("host: ")) {
-      return line.replaceFirst(meta.getLocalHeaderHost(), meta.getRemoteHeaderHost());
-    }
     if (line.toLowerCase().startsWith("transfer-encoding: chunked")) {
       meta.setChunked(true);
     }
     if (line.toLowerCase().startsWith("content-length:")) {
       meta.setContentLength(Integer.parseInt(line.substring(line.indexOf(':') + 1).trim()));
+    }
+    if (line.toLowerCase().startsWith("host: ")) {
+      return line.replaceFirst(meta.getLocalHeaderHost(), meta.getRemoteHeaderHost());
+    }
+    if (line.toLowerCase().startsWith("x-mockbyte")) {
+      meta.setMkbHeader(line.substring(line.indexOf(':') + 1).trim());
+      return "";
     }
     return line;
   }

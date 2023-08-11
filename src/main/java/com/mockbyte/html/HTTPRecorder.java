@@ -31,7 +31,7 @@ public class HTTPRecorder {
   }
 
   public File getDir() {
-    meta.setDir(String.format("%s/%s/%s", config.getMkbDir(), HTTPRecorder.dirName(meta.getRemoteHeaderHost()), meta.getHash()));
+    meta.setDir(String.format("%s/%s/%s", config.getMockDir(), HTTPRecorder.normalize(meta.getRemoteHeaderHost()), meta.getHash()));
     var dir = new File(meta.getDir());
     if (!dir.exists()) {
       boolean mkdirs = dir.mkdirs();
@@ -79,12 +79,13 @@ public class HTTPRecorder {
     return instance;
   }
 
-  public static String dirName(String remoteHeaderHost) {
-    var name = remoteHeaderHost.replace(':', '_');
-    name = name.replace('.', '_');
-    name = name.toLowerCase();
-    name = name.replaceAll("\\s+", " ");
-    var normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
+  public static String normalize(String input) {
+    var string = input.replace(':', '_');
+    string = string.replace('.', '_');
+    string = string.replace(',', '_');
+    string = string.toLowerCase();
+    string = string.replaceAll("\\s+", "_");
+    var normalized = Normalizer.normalize(string, Normalizer.Form.NFD);
     normalized = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     return normalized;
   }

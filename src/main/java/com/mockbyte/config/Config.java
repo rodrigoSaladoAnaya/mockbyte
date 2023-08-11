@@ -26,7 +26,7 @@ public class Config {
   private String remoteHost;
   private int remotePort;
   private boolean ssl;
-  private String mkbDir = "./out";
+  private String mockDir = "./mkb";
   private List<MockFile> mockFiles = new ArrayList<>();
 
   public static Config fromPath(String path) {
