@@ -1,12 +1,10 @@
 package com.mockbyte.server;
 
 import com.mockbyte.Args;
-import com.mockbyte.MockByte;
 import com.mockbyte.config.Config;
 import com.mockbyte.config.ConfigHttp;
-import com.mockbyte.http.Mock;
-import com.mockbyte.http.Proxy;
-import com.mockbyte.http.Record;
+import com.mockbyte.http.ProxyFlow;
+import com.mockbyte.http.ProxyStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,23 +30,18 @@ public final class ServerHttp implements Server {
       while (!serverSocket.isClosed()) {
         var localSocket = serverSocket.accept();
         log.info("Client connected on port [{}]", localSocket.getPort());
-        MockByte.threadFactory.newThread(() -> {
-          try (var stream = getStream(args, config, localSocket)) {
-          } catch (IOException cause) {
-            throw new RuntimeException(cause);
-          }
-        });
+        Config.threadFactory.newThread(execute(args, config, localSocket)).start();
       }
     }
   }
 
-  private Proxy getStream(Args args, ConfigHttp config, Socket localSocket) throws IOException {
+  private Runnable execute(Args args, ConfigHttp config, Socket localSocket) throws IOException {
     return switch (args.getCommand()) {
-      case PROXY -> Proxy.create(args, config, localSocket);
-      case RECORD -> Record.create(args, config, localSocket);
-      case MOCK -> Mock.create(args, config, localSocket);
+      case PROXY -> ProxyFlow.execute(args, config, localSocket);
+      case RECORD -> null;
+      case MOCK -> null;
     };
-  }
+  }/**/
 
   public static Server create(Args args, Config config) {
     var instance = new ServerHttp(args, (ConfigHttp) config);

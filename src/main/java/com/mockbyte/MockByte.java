@@ -9,9 +9,6 @@ import java.util.concurrent.ThreadFactory;
 
 public class MockByte {
 
-  public static final ThreadFactory threadFactory = Thread.ofVirtual().name("mockbyte", 0L).factory();
-  public static final ObjectMapper objectMapper = new ObjectMapper();
-
   public static void main(String[] args) throws IOException {
     MockByte.createDefault(args);
   }
