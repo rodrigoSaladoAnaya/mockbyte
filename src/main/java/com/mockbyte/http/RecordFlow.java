@@ -14,7 +14,7 @@ public class RecordFlow {
 
   private static final Logger log = LoggerFactory.getLogger(RecordFlow.class);
 
-  public static Runnable execute(Args args, ConfigHttp config, Socket localSocket) {
+  public static Runnable create(Args args, ConfigHttp config, Socket localSocket) {
     return () -> {
       var tx = Tx.create(config);
       try (

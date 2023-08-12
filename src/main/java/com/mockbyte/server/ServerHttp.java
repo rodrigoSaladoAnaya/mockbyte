@@ -5,7 +5,6 @@ import com.mockbyte.config.Config;
 import com.mockbyte.config.ConfigHttp;
 import com.mockbyte.http.MockFlow;
 import com.mockbyte.http.ProxyFlow;
-import com.mockbyte.http.ProxyStream;
 import com.mockbyte.http.RecordFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +38,9 @@ public final class ServerHttp implements Server {
 
   private Runnable execute(Args args, ConfigHttp config, Socket localSocket) throws IOException {
     return switch (args.getCommand()) {
-      case PROXY -> ProxyFlow.execute(args, config, localSocket);
-      case RECORD -> RecordFlow.execute(args, config, localSocket);
-      case MOCK -> MockFlow.execute(args, config, localSocket);
+      case PROXY -> ProxyFlow.create(args, config, localSocket);
+      case RECORD -> RecordFlow.create(args, config, localSocket);
+      case MOCK -> MockFlow.create(args, config, localSocket);
     };
   }
 
