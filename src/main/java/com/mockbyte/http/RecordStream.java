@@ -12,7 +12,7 @@ import java.nio.file.Files;
 
 public class RecordStream extends ProxyStream {
 
-  private enum SUFFIX {mkb, meta}
+  public enum SUFFIX {mkb, meta}
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
   private final Args args;
@@ -30,7 +30,7 @@ public class RecordStream extends ProxyStream {
   public void writeHttpRequest(byte[] buffer) throws IOException {
     tx.setTime(System.currentTimeMillis());
     tx.getCount().incrementAndGet();
-    var file = getFile(SUFFIX.mkb);
+    var file = getFile(config, tx, SUFFIX.mkb);
     log.info("RECORD_START -> uuid: {}, hash: {}, file: {}", tx.getUuid(), tx.getHash(), file);
     output = new FileOutputStream(file);
     super.writeHttpRequest(buffer);
@@ -47,13 +47,13 @@ public class RecordStream extends ProxyStream {
     super.endRequest();
     output.close();
     log.info("RECORD_STOP ({}ms)-> uuid: {}, hash: {}", tx.getTime(), tx.getUuid(), tx.getHash());
-    var metaFile = getFile(SUFFIX.meta);
+    var metaFile = getFile(config, tx, SUFFIX.meta);
     var json = Config.objectMapper.createObjectNode();
     json.put("elapsed", tx.getTime());
     Files.write(metaFile.toPath(), json.toString().getBytes(StandardCharsets.UTF_8));
   }
 
-  public File getDir() {
+  public static File getDir(ConfigHttp config, Tx tx) {
     tx.setDir(String.format("%s/%s/%s", config.getMockDir(), Config.normalize(tx.getRemoteHeaderHost()), tx.getHash()));
     var dir = new File(tx.getDir());
     if (!dir.exists()) {
@@ -62,17 +62,17 @@ public class RecordStream extends ProxyStream {
     return dir;
   }
 
-  public File getFile(SUFFIX suffix) throws IOException {
-    var dir = getDir();
-    var file = new File(dir, getFileName(suffix));
+  public static File getFile(ConfigHttp config, Tx tx, SUFFIX suffix) throws IOException {
+    var dir = getDir(config, tx);
+    var file = new File(dir, getFileName(tx, suffix));
     if (!file.exists()) {
       boolean newFile = file.createNewFile();
     }
     return file;
   }
 
-  public String getFileName(SUFFIX suffix) {
-    return String.format("%s.%s", getTx().getCount(), suffix);
+  public static String getFileName(Tx tx, SUFFIX suffix) {
+    return String.format("%s.%s", tx.getCount(), suffix);
   }
 
   public static RecordStream create(Args args, ConfigHttp config, Tx tx, InputStream input, OutputStream output) throws IOException {

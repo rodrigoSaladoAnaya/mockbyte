@@ -106,7 +106,7 @@ public class ProxyStream implements HttpStream {
       if (tx.getMkbHeader() != null && !tx.getMkbHeader().isEmpty()) {
         tx.setHash(Config.normalize(tx.getMkbHeader()));
       } else {
-        tx.setHash(Config.md5(tx.getCommand()));
+        tx.setHash(Config.md5(tx.getStarLine()));
       }
     }
   }

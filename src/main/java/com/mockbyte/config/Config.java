@@ -12,12 +12,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 public sealed interface Config permits ConfigHttp {
 
-  static final Logger log = LoggerFactory.getLogger(Config.class);
-  public static final ThreadFactory threadFactory = Thread.ofVirtual().name("mockbyte", 0L).factory();
-  public static final ObjectMapper objectMapper = new ObjectMapper();
+  Logger log = LoggerFactory.getLogger(Config.class);
+  ThreadFactory threadFactory = Thread.ofVirtual().name("mockbyte", 0L).factory();
+  ObjectMapper objectMapper = new ObjectMapper();
 
   static Config create(Args args) throws IOException {
     var file = new File(args.getConfigPath());
@@ -34,7 +35,7 @@ public sealed interface Config permits ConfigHttp {
     return config;
   }
 
-  public static String normalize(String input) {
+  static String normalize(String input) {
     var string = input.replace(':', '_');
     string = string.replace('.', '_');
     string = string.replace(',', '_');
@@ -45,7 +46,7 @@ public sealed interface Config permits ConfigHttp {
     return normalized;
   }
 
-  public static String md5(String input) throws NoSuchAlgorithmException {
+  static String md5(String input) throws NoSuchAlgorithmException {
     MessageDigest md = MessageDigest.getInstance("MD5");
     byte[] hashInBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
     StringBuilder sb = new StringBuilder();
@@ -53,8 +54,14 @@ public sealed interface Config permits ConfigHttp {
       sb.append(String.format("%02x", b));
     }
     return sb.toString();
-
   }
 
+  static void sleep(long millis) {
+    try {
+      TimeUnit.MILLISECONDS.sleep(millis);
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 
 }

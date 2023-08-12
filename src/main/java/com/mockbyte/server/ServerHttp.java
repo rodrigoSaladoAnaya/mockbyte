@@ -3,6 +3,7 @@ package com.mockbyte.server;
 import com.mockbyte.Args;
 import com.mockbyte.config.Config;
 import com.mockbyte.config.ConfigHttp;
+import com.mockbyte.http.MockFlow;
 import com.mockbyte.http.ProxyFlow;
 import com.mockbyte.http.ProxyStream;
 import com.mockbyte.http.RecordFlow;
@@ -40,9 +41,9 @@ public final class ServerHttp implements Server {
     return switch (args.getCommand()) {
       case PROXY -> ProxyFlow.execute(args, config, localSocket);
       case RECORD -> RecordFlow.execute(args, config, localSocket);
-      case MOCK -> null;
+      case MOCK -> MockFlow.execute(args, config, localSocket);
     };
-  }/**/
+  }
 
   public static Server create(Args args, Config config) {
     var instance = new ServerHttp(args, (ConfigHttp) config);
