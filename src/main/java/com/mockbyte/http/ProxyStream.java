@@ -57,7 +57,7 @@ public class ProxyStream implements HttpStream {
     tx.setCommand(command.toString());
     setTxHash();
     var buffer = tx.getCommand().getBytes(StandardCharsets.UTF_8);
-    writeRequest(buffer);
+    writeHttpRequest(buffer);
   }
 
   public void writeChunked() throws IOException {
@@ -67,7 +67,7 @@ public class ProxyStream implements HttpStream {
     while (!isEOF()) {
       var read = input.read(buffer);
       contentLength += read;
-      writeResponse(buffer, 0, read);
+      writeHttpBody(buffer, 0, read);
       addTail(buffer, read);
     }
     if (tx.getContentLength() == -1) {
@@ -80,7 +80,7 @@ public class ProxyStream implements HttpStream {
     var buffer = new byte[size];
     while (total < tx.getContentLength()) {
       var read = input.read(buffer);
-      writeResponse(buffer, 0, read);
+      writeHttpBody(buffer, 0, read);
       total += read;
     }
   }
@@ -89,11 +89,11 @@ public class ProxyStream implements HttpStream {
     output.flush();
   }
 
-  public void writeRequest(byte[] buffer) throws IOException {
+  public void writeHttpRequest(byte[] buffer) throws IOException {
     write(buffer, 0, buffer.length);
   }
 
-  public void writeResponse(byte[] buffer, int off, int len) throws IOException {
+  public void writeHttpBody(byte[] buffer, int off, int len) throws IOException {
     write(buffer, off, len);
   }
 

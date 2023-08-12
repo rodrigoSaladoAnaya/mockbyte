@@ -27,18 +27,18 @@ public class RecordStream extends ProxyStream {
     this.tx = tx;
   }
 
-  public void writeRequest(byte[] buffer) throws IOException {
+  public void writeHttpRequest(byte[] buffer) throws IOException {
     tx.setTime(System.currentTimeMillis());
     tx.getCount().incrementAndGet();
     var file = getFile(SUFFIX.mkb);
     log.info("RECORD_START -> uuid: {}, hash: {}, file: {}", tx.getUuid(), tx.getHash(), file);
     output = new FileOutputStream(file);
-    super.writeRequest(buffer);
+    super.writeHttpRequest(buffer);
     output.write(buffer);
   }
 
-  public void writeResponse(byte[] buffer, int off, int len) throws IOException {
-    super.writeResponse(buffer, off, len);
+  public void writeHttpBody(byte[] buffer, int off, int len) throws IOException {
+    super.writeHttpBody(buffer, off, len);
     output.write(buffer, off, len);
   }
 
