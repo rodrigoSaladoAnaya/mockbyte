@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public class RecordStream extends ProxyStream {
 
@@ -26,6 +28,7 @@ public class RecordStream extends ProxyStream {
   }
 
   public void writeRequest(byte[] buffer) throws IOException {
+    tx.setTime(System.currentTimeMillis());
     tx.getCount().incrementAndGet();
     var file = getFile(SUFFIX.mkb);
     log.info("RECORD_START -> uuid: {}, hash: {}, file: {}", tx.getUuid(), tx.getHash(), file);
@@ -40,9 +43,14 @@ public class RecordStream extends ProxyStream {
   }
 
   public void endRequest() throws IOException {
+    tx.setTime(System.currentTimeMillis() - tx.getTime());
     super.endRequest();
     output.close();
-    log.info("RECORD_STOP -> uuid: {}, hash: {}", tx.getUuid(), tx.getHash());
+    log.info("RECORD_STOP ({}ms)-> uuid: {}, hash: {}", tx.getTime(), tx.getUuid(), tx.getHash());
+    var metaFile = getFile(SUFFIX.meta);
+    var json = Config.objectMapper.createObjectNode();
+    json.put("elapsed", tx.getTime());
+    Files.write(metaFile.toPath(), json.toString().getBytes(StandardCharsets.UTF_8));
   }
 
   public File getDir() {

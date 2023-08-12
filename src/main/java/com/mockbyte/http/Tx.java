@@ -27,6 +27,8 @@ public class Tx {
   private String dir;
   @ToString.Exclude
   private AtomicInteger count = new AtomicInteger(-1);
+  @ToString.Exclude
+  private long time;
 
   public void reset(Type type) {
     this.type = type;
