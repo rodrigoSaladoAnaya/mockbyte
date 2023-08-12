@@ -1,5 +1,4 @@
 {
-  "type": "HTTP",
   "localHost": "localhost",
   "localPort": 4646,
   "remoteHost": "httpbin.org",

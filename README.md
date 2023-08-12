@@ -1,17 +1,17 @@
 # mockbyte (POC)
-## Tool to mimic request between servers
+## Tool to mock request between servers
 
 ###  PROXY
 - doc: With PROXY option, it is now only use for testing and configurations.
-- run-server: `./mvnw clean compile exec:java -Dexec.args="src/main/resources/httpbin.json PROXY"`
+- run-server: `./mvnw clean compile exec:java -Dexec.args="src/main/resources/httpbin.json http proxy"`
 - test: `curl -X DELETE "http://localhost:4646/delete" -H "accept: application/json"`
 
 ### RECORD
-- doc: Save the req/res in a direcotry.
-- run-server `./mvnw clean compile exec:java -Dexec.args="src/main/resources/httpbin.json RECORD"`
+- doc: Save the req/res in a directory.
+- run-server `./mvnw clean compile exec:java -Dexec.args="src/main/resources/config.json http record"`
 - test: `curl -X DELETE "http://localhost:4646/delete" -H "accept: application/json"`
 
 ### MOCK
 - doc: Use the saved file to response the request.
-- run `./mvnw clean compile exec:java -Dexec.args="src/main/resources/httpbin.json MOCK"`
+- run-server `./mvnw clean compile exec:java -Dexec.args="src/main/resources/config.json http mock"`
 - test: `curl -X DELETE "http://localhost:4646/delete" -H "accept: application/json"`
