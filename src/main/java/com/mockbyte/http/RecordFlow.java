@@ -10,17 +10,17 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 
-public class ProxyFlow {
+public class RecordFlow {
 
-  private static final Logger log = LoggerFactory.getLogger(ProxyFlow.class);
+  private static final Logger log = LoggerFactory.getLogger(RecordFlow.class);
 
   public static Runnable execute(Args args, ConfigHttp config, Socket localSocket) {
     return () -> {
       var tx = Tx.create(config);
       try (
         var remoteSocket = Server.getRemoteSocket(args, config);
-        var inputStream = ProxyStream.create(tx, localSocket.getInputStream(), remoteSocket.getOutputStream());
-        var outputStream = ProxyStream.create(tx, remoteSocket.getInputStream(), localSocket.getOutputStream());
+        var inputStream = RecordStream.create(args, config, tx, localSocket.getInputStream(), remoteSocket.getOutputStream());
+        var outputStream = RecordStream.create(args, config, tx, remoteSocket.getInputStream(), localSocket.getOutputStream());
       ) {
         tx.reset(Tx.Type.REQ);
         log.info("REQ_INI -> {}", tx);
@@ -35,7 +35,8 @@ public class ProxyFlow {
 
         do {
           tx.reset(Tx.Type.RES);
-          log.info("***RES_INI -> {}", tx);  outputStream.writeCommand();
+          log.info("***RES_INI -> {}", tx);
+          outputStream.writeCommand();
           if (tx.isChunked()) {
             outputStream.writeChunked();
           } else {

@@ -1,9 +1,6 @@
 package com.mockbyte.http;
 
-import com.mockbyte.Args;
 import com.mockbyte.config.Config;
-import com.mockbyte.config.ConfigHttp;
-import com.mockbyte.server.Server;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +8,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class ProxyStream implements HttpStream {
@@ -56,9 +55,9 @@ public class ProxyStream implements HttpStream {
       command.append(line);
     }
     tx.setCommand(command.toString());
-    var buffer = tx.getCommand().getBytes(StandardCharsets.UTF_8);
-    output.write(buffer);
     setTxHash();
+    var buffer = tx.getCommand().getBytes(StandardCharsets.UTF_8);
+    writeRequest(buffer);
   }
 
   public void writeChunked() throws IOException {
@@ -68,9 +67,10 @@ public class ProxyStream implements HttpStream {
     while (!isEOF()) {
       var read = input.read(buffer);
       contentLength += read;
-      output.write(buffer, 0, read);
+      writeResponse(buffer, 0, read);
       addTail(buffer, read);
     }
+    log.info("a ver........");
     if (tx.getContentLength() == -1) {
       tx.setContentLength(contentLength);
     }
@@ -81,13 +81,25 @@ public class ProxyStream implements HttpStream {
     var buffer = new byte[size];
     while (total < tx.getContentLength()) {
       var read = input.read(buffer);
-      output.write(buffer, 0, read);
+      writeResponse(buffer, 0, read);
       total += read;
     }
   }
 
   public void endRequest() throws IOException {
     output.flush();
+  }
+
+  public void writeRequest(byte[] buffer) throws IOException {
+    write(buffer, 0, buffer.length);
+  }
+
+  public void writeResponse(byte[] buffer, int off, int len) throws IOException {
+    write(buffer, off, len);
+  }
+
+  private void write(byte[] buffer, int off, int len) throws IOException {
+    output.write(buffer, off, len);
   }
 
   private void setTxHash() throws NoSuchAlgorithmException {

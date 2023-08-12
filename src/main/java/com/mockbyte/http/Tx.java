@@ -18,14 +18,21 @@ public class Tx {
   private String starLine;
   private boolean chunked;
   private int contentLength = -1;
-  private String mkbHeader;
   private String hash;
+  @ToString.Exclude
+  private String mkbHeader;
   @ToString.Exclude
   private String command;
   @ToString.Exclude
   private String dir;
   @ToString.Exclude
-  private AtomicInteger txs = new AtomicInteger(-1);
+  private AtomicInteger count = new AtomicInteger(-1);
+
+  public void reset(Type type) {
+    this.type = type;
+    contentLength = -1;
+    chunked = false;
+  }
 
   public static Tx create(ConfigHttp config) {
     var instance = new Tx();
