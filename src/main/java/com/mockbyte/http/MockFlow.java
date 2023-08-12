@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 
-public class MockFlow extends ProxyFlow {
+public class MockFlow implements Flow {
 
   public static Runnable create(Args args, ConfigHttp config, Socket localSocket) {
     return () -> {

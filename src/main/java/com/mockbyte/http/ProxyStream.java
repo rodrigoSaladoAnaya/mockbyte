@@ -130,8 +130,7 @@ public class ProxyStream implements HttpStream {
     }
     return line;
   }
-
-
+  
   private boolean isLNCR() {
     return lncr.toString().equals("[13, 10]");
   }
