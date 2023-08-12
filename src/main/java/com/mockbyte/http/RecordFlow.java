@@ -3,16 +3,12 @@ package com.mockbyte.http;
 import com.mockbyte.Args;
 import com.mockbyte.config.ConfigHttp;
 import com.mockbyte.server.Server;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 
 public class RecordFlow extends ProxyFlow {
-
-  private static final Logger log = LoggerFactory.getLogger(RecordFlow.class);
 
   public static Runnable create(Args args, ConfigHttp config, Socket localSocket) {
     return () -> {
