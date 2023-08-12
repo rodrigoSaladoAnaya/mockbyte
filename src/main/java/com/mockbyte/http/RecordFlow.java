@@ -10,41 +10,20 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 
-public class RecordFlow {
+public class RecordFlow extends ProxyFlow {
 
   private static final Logger log = LoggerFactory.getLogger(RecordFlow.class);
 
   public static Runnable create(Args args, ConfigHttp config, Socket localSocket) {
     return () -> {
+      var instance = new RecordFlow();
       var tx = Tx.create(config);
       try (
         var remoteSocket = Server.getRemoteSocket(args, config);
         var inputStream = RecordStream.create(args, config, tx, localSocket.getInputStream(), remoteSocket.getOutputStream());
         var outputStream = RecordStream.create(args, config, tx, remoteSocket.getInputStream(), localSocket.getOutputStream());
       ) {
-        tx.reset(Tx.Type.REQ);
-        log.info("REQ_INI -> {}", tx);
-        inputStream.writeCommand();
-        if (tx.isChunked()) {
-          inputStream.writeChunked();
-        } else {
-          inputStream.writeFixedLength();
-        }
-        inputStream.endRequest();
-        log.info("REQ_END -> {}", tx);
-
-        do {
-          tx.reset(Tx.Type.RES);
-          log.info("RES_INI -> {}", tx);
-          outputStream.writeCommand();
-          if (tx.isChunked()) {
-            outputStream.writeChunked();
-          } else {
-            outputStream.writeFixedLength();
-          }
-          outputStream.endRequest();
-          log.info("RES_END -> {}", tx);
-        } while (tx.getContentLength() == -1);
+        instance.http(tx, inputStream, outputStream);
       } catch (IOException | NoSuchAlgorithmException cause) {
         throw new RuntimeException(cause);
       }

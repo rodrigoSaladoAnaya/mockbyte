@@ -9,12 +9,13 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 
-public class MockFlow {
+public class MockFlow extends ProxyFlow{
 
   private static final Logger log = LoggerFactory.getLogger(MockFlow.class);
 
   public static Runnable create(Args args, ConfigHttp config, Socket localSocket) {
     return () -> {
+      var instance = new MockFlow();
       var tx = Tx.create(config);
       try (
         var inputMock = new MockInputStream(config, tx);
@@ -22,29 +23,7 @@ public class MockFlow {
         var inputStream = MockStream.create(config, tx, localSocket.getInputStream(), outputMock);
         var outputStream = MockStream.create(config, tx, inputMock, localSocket.getOutputStream());
       ) {
-        tx.reset(Tx.Type.REQ);
-        log.info("REQ_INI -> {}", tx);
-        inputStream.writeCommand();
-        if (tx.isChunked()) {
-          inputStream.writeChunked();
-        } else {
-          inputStream.writeFixedLength();
-        }
-        inputStream.endRequest();
-        log.info("REQ_END -> {}", tx);
-
-        do {
-          tx.reset(Tx.Type.RES);
-          log.info("RES_INI -> {}", tx);
-          outputStream.writeCommand();
-          if (tx.isChunked()) {
-            outputStream.writeChunked();
-          } else {
-            outputStream.writeFixedLength();
-          }
-          outputStream.endRequest();
-          log.info("RES_END -> {}", tx);
-        } while (tx.getContentLength() == -1);/**/
+        instance.http(tx, inputStream, outputStream);
       } catch (IOException | NoSuchAlgorithmException cause) {
         throw new RuntimeException(cause);
       }
