@@ -70,7 +70,6 @@ public class ProxyStream implements HttpStream {
       writeResponse(buffer, 0, read);
       addTail(buffer, read);
     }
-    log.info("a ver........");
     if (tx.getContentLength() == -1) {
       tx.setContentLength(contentLength);
     }

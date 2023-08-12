@@ -35,7 +35,7 @@ public class RecordFlow {
 
         do {
           tx.reset(Tx.Type.RES);
-          log.info("***RES_INI -> {}", tx);
+          log.info("RES_INI -> {}", tx);
           outputStream.writeCommand();
           if (tx.isChunked()) {
             outputStream.writeChunked();

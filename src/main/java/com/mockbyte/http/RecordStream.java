@@ -64,7 +64,7 @@ public class RecordStream extends ProxyStream {
   }
 
   public String getFileName(SUFFIX suffix) {
-    return String.format("%s.%s", getTx().getCount(), suffix); //
+    return String.format("%s.%s", getTx().getCount(), suffix);
   }
 
   public static RecordStream create(Args args, ConfigHttp config, Tx tx, InputStream input, OutputStream output) throws IOException {

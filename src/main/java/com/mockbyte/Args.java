@@ -18,8 +18,8 @@ public class Args {
   public static Args create(String[] args) {
     var instance = new Args();
     instance.setConfigPath(args[0]);
-    instance.setServerType(ServerType.valueOf(args[1]));
-    instance.setCommand(Command.valueOf(args[2]));
+    instance.setServerType(ServerType.valueOf(args[1].toUpperCase()));
+    instance.setCommand(Command.valueOf(args[2].toUpperCase()));
     return instance;
   }
 
