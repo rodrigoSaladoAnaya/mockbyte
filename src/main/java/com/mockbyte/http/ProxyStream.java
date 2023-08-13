@@ -20,8 +20,8 @@ public class ProxyStream implements HttpStream {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
   private final int size = 1024;
-  private final Deque<Byte> lncr = new ArrayDeque<>(2);
-  private final Deque<Byte> lec = new ArrayDeque<>(4);
+  private final Deque<Byte> eol = new ArrayDeque<>(2);
+  private final Deque<Byte> eob = new ArrayDeque<>(4);
   private final Deque<Byte> eof = new ArrayDeque<>(7);
   private final InputStream input;
   private final OutputStream output;
@@ -35,10 +35,10 @@ public class ProxyStream implements HttpStream {
   }
 
   public String readLine() throws IOException {
-    lncr.clear();
+    eol.clear();
     var buffer = new ArrayList<Byte>();
     byte read;
-    while (!isLNCR()) {
+    while (!isEOL()) {
       read = (byte) input.read();
       addTail(read);
       buffer.add(read);
@@ -47,7 +47,7 @@ public class ProxyStream implements HttpStream {
   }
 
   public void writeCommand() throws IOException, NoSuchAlgorithmException {
-    lec.clear();
+    eob.clear();
     var command = new StringBuilder();
     while (!isLEC()) {
       var line = readLine();
@@ -131,12 +131,12 @@ public class ProxyStream implements HttpStream {
     return line;
   }
   
-  private boolean isLNCR() {
-    return lncr.toString().equals("[13, 10]");
+  private boolean isEOL() {
+    return eol.toString().equals("[13, 10]");
   }
 
   private boolean isLEC() {
-    return lec.toString().equals("[13, 10, 13, 10]");
+    return eob.toString().equals("[13, 10, 13, 10]");
   }
 
   private boolean isEOF() {
@@ -148,24 +148,24 @@ public class ProxyStream implements HttpStream {
     var i = read - Math.min(read, sizeof);
     for (; i < read; i++) {
       var b = buffer[i];
-      addLNCR(b);
-      addLEC(b);
+      addEOL(b);
+      addEOB(b);
       addEOF(b);
     }
   }
 
   private void addTail(byte b) {
-    addLNCR(b);
-    addLEC(b);
+    addEOL(b);
+    addEOB(b);
     addEOF(b);
   }
 
-  private void addLNCR(byte b) {
-    addDeque(lncr, 2, b);
+  private void addEOL(byte b) {
+    addDeque(eol, 2, b);
   }
 
-  private void addLEC(byte b) {
-    addDeque(lec, 4, b);
+  private void addEOB(byte b) {
+    addDeque(eob, 4, b);
   }
 
   private void addEOF(byte b) {
