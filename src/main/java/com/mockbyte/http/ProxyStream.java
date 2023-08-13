@@ -10,19 +10,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ProxyStream implements HttpStream {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
   private final int size = 1024;
-  private final Deque<Byte> eol = new ArrayDeque<>(2);
-  private final Deque<Byte> eob = new ArrayDeque<>(4);
-  private final Deque<Byte> eof = new ArrayDeque<>(7);
+  private final byte[] END_OF_LINE = {13, 10};
+  private final byte[] END_OF_BLOCK = {13, 10, 13, 10};
+  private final byte[] END_OF_FILE = {13, 10, 48, 13, 10, 13, 10};
+  private final Deque<Byte> eol = new ArrayDeque<>(END_OF_LINE.length);
+  private final Deque<Byte> eob = new ArrayDeque<>(END_OF_BLOCK.length);
+  private final Deque<Byte> eof = new ArrayDeque<>(END_OF_FILE.length);
   private final InputStream input;
   private final OutputStream output;
   @Getter
@@ -49,7 +49,7 @@ public class ProxyStream implements HttpStream {
   public void writeCommand() throws IOException, NoSuchAlgorithmException {
     eob.clear();
     var command = new StringBuilder();
-    while (!isLEC()) {
+    while (!isEOB()) {
       var line = readLine();
       line = processLine(line);
       command.append(line);
@@ -132,19 +132,19 @@ public class ProxyStream implements HttpStream {
   }
 
   private boolean isEOL() {
-    return eol.toString().equals("[13, 10]");
+    return eol.toString().equals(Arrays.toString(END_OF_LINE));
   }
 
-  private boolean isLEC() {
-    return eob.toString().equals("[13, 10, 13, 10]");
+  private boolean isEOB() {
+    return eob.toString().equals(Arrays.toString(END_OF_BLOCK));
   }
 
   private boolean isEOF() {
-    return eof.toString().equals("[13, 10, 48, 13, 10, 13, 10]");
+    return eof.toString().equals(Arrays.toString(END_OF_FILE));
   }
 
   private void addTail(byte[] buffer, int read) {
-    var sizeof = 7;
+    var sizeof = END_OF_FILE.length;
     var i = read - Math.min(read, sizeof);
     for (; i < read; i++) {
       var b = buffer[i];
@@ -161,15 +161,15 @@ public class ProxyStream implements HttpStream {
   }
 
   private void addEOL(byte b) {
-    addDeque(eol, 2, b);
+    addDeque(eol, END_OF_LINE.length, b);
   }
 
   private void addEOB(byte b) {
-    addDeque(eob, 4, b);
+    addDeque(eob, END_OF_BLOCK.length, b);
   }
 
   private void addEOF(byte b) {
-    addDeque(eof, 7, b);
+    addDeque(eof, END_OF_FILE.length, b);
   }
 
   private void addDeque(Deque<Byte> deque, int size, byte b) {

@@ -11,7 +11,7 @@ import java.net.Socket;
 public sealed interface Server permits ServerHttp {
   void start() throws IOException;
 
-  public static Socket getRemoteSocket(Args args, ConfigHttp config) throws IOException {
+  static Socket getRemoteSocket(Args args, ConfigHttp config) throws IOException {
     if (args.getCommand() == Args.Command.MOCK) {
       return null;
     }

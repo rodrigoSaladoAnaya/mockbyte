@@ -15,5 +15,4 @@ public final class ConfigHttp implements Config {
   private boolean ssl;
   private String mockDir = "./mkb";
 
-
 }
