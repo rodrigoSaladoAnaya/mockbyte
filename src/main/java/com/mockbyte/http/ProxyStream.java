@@ -86,7 +86,7 @@ public class ProxyStream implements HttpStream {
   }
 
   public void endRequest() throws IOException {
-    tx.setTime(System.currentTimeMillis() - tx.getTime());
+    tx.setTime(System.currentTimeMillis() - tx.getTime());///Duuuu maybe
     output.flush();
   }
 

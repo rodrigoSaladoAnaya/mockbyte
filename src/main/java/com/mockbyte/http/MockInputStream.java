@@ -28,7 +28,7 @@ public class MockInputStream extends InputStream {
     setMkbFile();
     var meta = getMeta();
     if (meta.getElapsed() != 0) {
-      log.info("MOCK_SLEEP -> {}ms", meta.getElapsed());
+      log.info("MOCK_SLEEP -> uuid: {}, {}ms", tx.getUuid(), meta.getElapsed());
       Config.sleep(meta.getElapsed());
     }
   }
