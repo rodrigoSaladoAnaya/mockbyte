@@ -66,6 +66,9 @@ public class ProxyStream implements HttpStream {
     var contentLength = 0;
     while (!isEOF()) {
       var read = input.read(buffer);
+      if (read == -1) {
+        break;
+      }
       contentLength += read;
       writeHttpBody(buffer, 0, read);
       addTail(buffer, read);
@@ -80,6 +83,9 @@ public class ProxyStream implements HttpStream {
     var buffer = new byte[size];
     while (total < tx.getContentLength()) {
       var read = input.read(buffer);
+      if (read == -1) {
+        break;
+      }
       writeHttpBody(buffer, 0, read);
       total += read;
     }
