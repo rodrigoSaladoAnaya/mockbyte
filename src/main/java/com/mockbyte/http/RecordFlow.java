@@ -6,6 +6,7 @@ import com.mockbyte.server.Server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 
 public class RecordFlow implements Flow {

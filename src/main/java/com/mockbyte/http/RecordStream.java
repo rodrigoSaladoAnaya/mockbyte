@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
@@ -25,7 +26,6 @@ public class RecordStream extends ProxyStream {
   }
 
   public void writeHttpRequest(byte[] buffer) throws IOException {
-    tx.setTime(System.currentTimeMillis());
     tx.getCount().incrementAndGet();
     var file = getFile(config, tx, SUFFIX.mkb);
     log.info("RECORD_START -> uuid: {}, hash: {}, file: {}", tx.getUuid(), tx.getHash(), file);
@@ -35,12 +35,16 @@ public class RecordStream extends ProxyStream {
   }
 
   public void writeHttpBody(byte[] buffer, int off, int len) throws IOException {
-    super.writeHttpBody(buffer, off, len);
-    output.write(buffer, off, len);
+    try {
+      super.writeHttpBody(buffer, off, len);
+      output.write(buffer, off, len);
+    } catch (SocketException ex) {
+      endRequest();
+      throw ex;
+    }
   }
 
   public void endRequest() throws IOException {
-    tx.setTime(System.currentTimeMillis() - tx.getTime());
     super.endRequest();
     output.close();
     log.info("RECORD_STOP ({}ms)-> uuid: {}, hash: {}", tx.getTime(), tx.getUuid(), tx.getHash());

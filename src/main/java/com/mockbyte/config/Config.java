@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public sealed interface Config permits ConfigHttp {
 
   Logger log = LoggerFactory.getLogger(Config.class);
-  ThreadFactory threadFactory = Thread.ofVirtual().name("mockbyte", 0L).factory();
+  ThreadFactory threadFactory = Thread.ofVirtual().name("mockbyte-", 0L).factory();
   ObjectMapper objectMapper = new ObjectMapper();
 
   static Config create(Args args) throws IOException {
@@ -47,9 +47,9 @@ public sealed interface Config permits ConfigHttp {
   }
 
   static String md5(String input) throws NoSuchAlgorithmException {
-    MessageDigest md = MessageDigest.getInstance("MD5");
-    byte[] hashInBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
-    StringBuilder sb = new StringBuilder();
+    var md5 = MessageDigest.getInstance("MD5");
+    var hashInBytes = md5.digest(input.getBytes(StandardCharsets.UTF_8));
+    var sb = new StringBuilder();
     for (byte b : hashInBytes) {
       sb.append(String.format("%02x", b));
     }

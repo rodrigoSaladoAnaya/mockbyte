@@ -34,6 +34,7 @@ public class Tx {
     this.type = type;
     contentLength = -1;
     chunked = false;
+    time = System.currentTimeMillis();
   }
 
   public static Tx create(ConfigHttp config) {
