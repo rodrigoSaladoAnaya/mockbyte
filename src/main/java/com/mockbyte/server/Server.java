@@ -15,7 +15,7 @@ public sealed interface Server permits ServerHttp {
     if (args.getCommand() == Args.Command.MOCK) {
       return null;
     }
-    if (config.isSsl()) {
+    if (config.getRemotePort() == 443 || config.isSsl()) {
       var socketFactory = SSLSocketFactory.getDefault();
       var socket = (SSLSocket) socketFactory.createSocket(config.getRemoteHost(), config.getRemotePort());
       socket.startHandshake();
