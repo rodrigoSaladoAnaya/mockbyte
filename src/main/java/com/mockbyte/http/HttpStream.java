@@ -6,7 +6,10 @@ import java.security.NoSuchAlgorithmException;
 
 public interface HttpStream extends Closeable {
   void writeCommand() throws IOException, NoSuchAlgorithmException;
+
   void writeChunked() throws IOException;
+
   void writeFixedLength() throws IOException;
+
   void endRequest() throws IOException;
 }

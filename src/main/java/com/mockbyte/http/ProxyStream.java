@@ -130,7 +130,7 @@ public class ProxyStream implements HttpStream {
     }
     return line;
   }
-  
+
   private boolean isEOL() {
     return eol.toString().equals("[13, 10]");
   }

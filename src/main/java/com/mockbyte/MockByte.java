@@ -1,11 +1,9 @@
 package com.mockbyte;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockbyte.config.Config;
 import com.mockbyte.server.ServerHttp;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadFactory;
 
 public class MockByte {
 
