@@ -1,6 +1,5 @@
 package com.mockbyte.http;
 
-import com.mockbyte.config.ConfigHttp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
