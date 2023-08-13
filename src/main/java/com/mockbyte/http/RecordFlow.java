@@ -16,8 +16,8 @@ public class RecordFlow implements Flow {
       var tx = Tx.create(config);
       try (
         var remoteSocket = Server.getRemoteSocket(args, config);
-        var inputStream = RecordStream.create(args, config, tx, localSocket.getInputStream(), remoteSocket.getOutputStream());
-        var outputStream = RecordStream.create(args, config, tx, remoteSocket.getInputStream(), localSocket.getOutputStream());
+        var inputStream = RecordStream.create(config, tx, localSocket.getInputStream(), remoteSocket.getOutputStream());
+        var outputStream = RecordStream.create(config, tx, remoteSocket.getInputStream(), localSocket.getOutputStream());
       ) {
         instance.http(tx, inputStream, outputStream);
       } catch (IOException | NoSuchAlgorithmException cause) {

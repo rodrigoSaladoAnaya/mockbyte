@@ -16,8 +16,8 @@ public class MockFlow implements Flow {
       try (
         var inputMock = new MockInputStream(config, tx);
         var outputMock = new MockOutputStream();
-        var inputStream = MockStream.create(config, tx, localSocket.getInputStream(), outputMock);
-        var outputStream = MockStream.create(config, tx, inputMock, localSocket.getOutputStream());
+        var inputStream = MockStream.create(tx, localSocket.getInputStream(), outputMock);
+        var outputStream = MockStream.create(tx, inputMock, localSocket.getOutputStream());
       ) {
         instance.http(tx, inputStream, outputStream);
       } catch (IOException | NoSuchAlgorithmException cause) {

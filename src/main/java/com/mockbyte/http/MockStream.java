@@ -12,17 +12,11 @@ import java.security.NoSuchAlgorithmException;
 public class MockStream extends ProxyStream {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
-  private final ConfigHttp config;
-  private final Tx tx;
   private final InputStream input;
-  private final OutputStream output;
 
-  public MockStream(ConfigHttp config, Tx tx, InputStream input, OutputStream output) {
+  public MockStream(Tx tx, InputStream input, OutputStream output) {
     super(tx, input, output);
-    this.config = config;
-    this.tx = tx;
     this.input = input;
-    this.output = output;
   }
 
   public void writeCommand() throws IOException, NoSuchAlgorithmException {
@@ -36,8 +30,8 @@ public class MockStream extends ProxyStream {
     super.writeHttpRequest(buffer);
   }
 
-  public static MockStream create(ConfigHttp config, Tx tx, InputStream input, OutputStream output) throws IOException {
-    var instance = new MockStream(config, tx, input, output);
+  public static MockStream create(Tx tx, InputStream input, OutputStream output) throws IOException {
+    var instance = new MockStream(tx, input, output);
     return instance;
   }
 }

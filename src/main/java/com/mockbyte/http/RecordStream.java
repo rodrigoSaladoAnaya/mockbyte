@@ -1,6 +1,5 @@
 package com.mockbyte.http;
 
-import com.mockbyte.Args;
 import com.mockbyte.config.Config;
 import com.mockbyte.config.ConfigHttp;
 import org.slf4j.Logger;
@@ -15,14 +14,12 @@ public class RecordStream extends ProxyStream {
   public enum SUFFIX {mkb, meta}
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
-  private final Args args;
   private final ConfigHttp config;
   private final Tx tx;
   private FileOutputStream output;
 
-  public RecordStream(Args args, ConfigHttp config, Tx tx, InputStream input, OutputStream output) {
+  public RecordStream(ConfigHttp config, Tx tx, InputStream input, OutputStream output) {
     super(tx, input, output);
-    this.args = args;
     this.config = config;
     this.tx = tx;
   }
@@ -75,8 +72,8 @@ public class RecordStream extends ProxyStream {
     return String.format("%s.%s", tx.getCount(), suffix);
   }
 
-  public static RecordStream create(Args args, ConfigHttp config, Tx tx, InputStream input, OutputStream output) throws IOException {
-    var instance = new RecordStream(args, config, tx, input, output);
+  public static RecordStream create(ConfigHttp config, Tx tx, InputStream input, OutputStream output) throws IOException {
+    var instance = new RecordStream(config, tx, input, output);
     return instance;
   }
 }
