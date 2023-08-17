@@ -31,6 +31,15 @@
             <version>1.18.28</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- DELETE.... -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.6.0</version>
+        </dependency>
+        <!-- DELETE.... -->
+
     </dependencies>
 
     <build>
