@@ -53,6 +53,10 @@ public class ProxyStream implements HttpStream {
       var line = readLine();
       line = processLine(line);
       command.append(line);
+      if (tx.getType() == Tx.Type.RES && !tx.isConnectionClose()) {
+        command.append("Connection: close\r\n");
+        tx.setConnectionClose(true);
+      }
     }
     tx.setCommand(command.toString());
     setTxHash();
@@ -133,6 +137,10 @@ public class ProxyStream implements HttpStream {
     }
     if (line.toLowerCase().startsWith("x-mockbyte:")) {
       tx.setMkbHeader(line.substring(line.indexOf(':') + 1).trim());
+      return "";
+    }
+    if (line.toLowerCase().startsWith("Connection: close")) {
+      tx.setConnectionClose(true);
       return "";
     }
     return line;

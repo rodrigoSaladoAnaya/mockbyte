@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 
 public interface Flow {
 
-  Logger log = LoggerFactory.getLogger(RecordFlow.class);
+  Logger log = LoggerFactory.getLogger(Flow.class);
 
   default void http(Tx tx, HttpStream inputStream, HttpStream outputStream) throws IOException, NoSuchAlgorithmException {
     tx.reset(Tx.Type.REQ);

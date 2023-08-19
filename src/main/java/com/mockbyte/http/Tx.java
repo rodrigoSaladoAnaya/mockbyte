@@ -29,6 +29,7 @@ public class Tx {
   private AtomicInteger count = new AtomicInteger(-1);
   @ToString.Exclude
   private long time;
+  private boolean connectionClose = false;
 
   public void reset(Type type) {
     this.type = type;

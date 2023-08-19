@@ -1,8 +1,5 @@
 package com.mockbyte.http;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 
 public class MockStream extends ProxyStream {
 
-  private final Logger log = LoggerFactory.getLogger(this.getClass());
   private final InputStream input;
 
   public MockStream(Tx tx, InputStream input, OutputStream output) {

@@ -33,6 +33,7 @@ public final class ServerHttp implements Server {
         log.info("Client connected on port [{}]", localSocket.getPort());
         Config.threadFactory.newThread(execute(args, config, localSocket)).start();
       }
+      log.info("HTTP Server STOP listen on port [{}]", serverSocket.getLocalPort());
     }
   }
 
