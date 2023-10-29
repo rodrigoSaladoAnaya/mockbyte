@@ -71,8 +71,10 @@ public class MockByte {
    */
   private static final byte[] READY_FOR_QUERY = {90, 0, 0, 0, 5, 73};
   private static final byte[] SYNC = {83, 0, 0, 0, 4};
+  private static final byte[] TERMINATE = {88, 0, 0, 0, 4};
   private static final Deque<Byte> rfq = new ArrayDeque<>(READY_FOR_QUERY.length);
   private static final Deque<Byte> sync = new ArrayDeque<>(SYNC.length);
+  private static final Deque<Byte> terminate = new ArrayDeque<>(TERMINATE.length);
 
   private static boolean isRFQ() {
     return rfq.toString().equals(Arrays.toString(READY_FOR_QUERY));
@@ -80,6 +82,14 @@ public class MockByte {
 
   private static boolean isSYNC() {
     return sync.toString().equals(Arrays.toString(SYNC));
+  }
+
+  private static boolean isTERMINATE() {
+    var is = terminate.toString().equals(Arrays.toString(TERMINATE));
+    if (!is) {
+      terminate.clear();
+    }
+    return is;
   }
 
   private static void addDeque(Deque<Byte> deque, int size, byte b) {
@@ -97,12 +107,20 @@ public class MockByte {
     addDeque(sync, SYNC.length, b);
   }
 
+  private static void addTERMINATE(byte b) {
+    addDeque(terminate, TERMINATE.length, b);
+  }
+
   private static void addTailRFQ(byte b) {
     addRFQ(b);
   }
 
   private static void addTailSYNC(byte b) {
     addSYNC(b);
+  }
+
+  private static void addTailTERMINATE(byte b) {
+    addTERMINATE(b);
   }
 
   public static byte[] joinMessage(byte[] header, byte[] payload) {
@@ -151,7 +169,9 @@ public class MockByte {
       byte b = (byte) read;
       byteList.add(b);
       addTailSYNC(b);
+      addTailTERMINATE(b);
     }
+    log.info("PterminateP....> {}", terminate);
     sync.clear();
     message = listToByte(byteList);
     printMessage("F >> ", message);
@@ -204,18 +224,11 @@ public class MockByte {
           printMessage("F >> ", message);
           psqlOutputStream.write(message);
 
-
-          backendMessage(psqlInputStream, proxyOutputStream);
-          frontendMessage(proxyInputStream, psqlOutputStream);
-
-          backendMessage(psqlInputStream, proxyOutputStream);
-          frontendMessage(proxyInputStream, psqlOutputStream);
-
-          backendMessage(psqlInputStream, proxyOutputStream);
-          frontendMessage(proxyInputStream, psqlOutputStream);
-
-          backendMessage(psqlInputStream, proxyOutputStream);
-          frontendMessage(proxyInputStream, psqlOutputStream);
+          while (!isTERMINATE()) {
+            backendMessage(psqlInputStream, proxyOutputStream);
+            frontendMessage(proxyInputStream, psqlOutputStream);
+            log.info("isTERMINATE(): {}", isTERMINATE());
+          }
 
           log.info("FIN....");
         }
