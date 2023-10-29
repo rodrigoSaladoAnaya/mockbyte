@@ -43,8 +43,7 @@ public class MockByte {
     ByteBuffer buffer = ByteBuffer.wrap(messageBytes, 0, 4);
     return buffer.getInt();
   }
-
-
+  
   public static int getMessageLength(byte[] messageBytes) {
     if (messageBytes == null || messageBytes.length < 5) {
       throw new IllegalArgumentException("Tamaño del mensaje inválido");
@@ -99,28 +98,21 @@ public class MockByte {
     deque.addLast(b);
   }
 
-  private static void addRFQ(byte b) {
+  private static void addBackend(byte b) {
     addDeque(rfq, READY_FOR_QUERY.length, b);
   }
 
-  private static void addSYNC(byte b) {
+  private static void addFrontend(byte b) {
     addDeque(sync, SYNC.length, b);
-  }
-
-  private static void addTERMINATE(byte b) {
     addDeque(terminate, TERMINATE.length, b);
   }
 
-  private static void addTailRFQ(byte b) {
-    addRFQ(b);
+  private static void addBackendTail(byte b) {
+    addBackend(b);
   }
 
-  private static void addTailSYNC(byte b) {
-    addSYNC(b);
-  }
-
-  private static void addTailTERMINATE(byte b) {
-    addTERMINATE(b);
+  private static void addFrontendTail(byte b) {
+    addFrontend(b);
   }
 
   public static byte[] joinMessage(byte[] header, byte[] payload) {
@@ -149,7 +141,7 @@ public class MockByte {
       }
       byte b = (byte) read;
       byteList.add(b);
-      addTailRFQ(b);
+      addBackendTail(b);
     }
     rfq.clear();
     message = listToByte(byteList);
@@ -168,10 +160,8 @@ public class MockByte {
       }
       byte b = (byte) read;
       byteList.add(b);
-      addTailSYNC(b);
-      addTailTERMINATE(b);
+      addFrontendTail(b);
     }
-    log.info("PterminateP....> {}", terminate);
     sync.clear();
     message = listToByte(byteList);
     printMessage("F >> ", message);
@@ -227,7 +217,6 @@ public class MockByte {
           while (!isTERMINATE()) {
             backendMessage(psqlInputStream, proxyOutputStream);
             frontendMessage(proxyInputStream, psqlOutputStream);
-            log.info("isTERMINATE(): {}", isTERMINATE());
           }
 
           log.info("FIN....");
