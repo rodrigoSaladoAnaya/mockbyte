@@ -1,6 +1,5 @@
 package com.mockbyte.psql;
 
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,14 +8,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ProxyServer implements Closeable {
+public class FrontendServer implements Closeable {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
   private final Config config;
-  @Getter
   private ServerSocket serverSocket;
 
-  private ProxyServer(Config config) {
+  private FrontendServer(Config config) {
     this.config = config;
   }
 
@@ -25,12 +23,11 @@ public class ProxyServer implements Closeable {
   }
 
   public Socket getNewConnection() throws IOException {
-    var socket = serverSocket.accept();
-    return socket;
+    return serverSocket.accept();
   }
 
-  public static ProxyServer create(Config config) throws IOException {
-    var instance = new ProxyServer(config);
+  public static FrontendServer create(Config config) throws IOException {
+    var instance = new FrontendServer(config);
     instance.createServerSocket();
     return instance;
   }
@@ -40,6 +37,13 @@ public class ProxyServer implements Closeable {
     if (serverSocket != null) {
       serverSocket.close();
     }
+  }
+
+  public boolean isClosed() {
+    if (serverSocket != null) {
+      return serverSocket.isClosed();
+    }
+    return false;
   }
 
 }

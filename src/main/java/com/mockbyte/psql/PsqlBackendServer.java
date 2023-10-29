@@ -4,15 +4,16 @@ import lombok.Getter;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
-public class PsqlServer implements Closeable {
+public class PsqlBackendServer implements Closeable {
 
   private final Config config;
-  @Getter
   private Socket socket;
 
-  private PsqlServer(Config config) {
+  private PsqlBackendServer(Config config) {
     this.config = config;
   }
 
@@ -20,8 +21,16 @@ public class PsqlServer implements Closeable {
     socket = new Socket("localhost", 5432);
   }
 
-  public static PsqlServer create(Config config) throws IOException {
-    var instance = new PsqlServer(config);
+  public InputStream getInputStream() throws IOException {
+    return socket.getInputStream();
+  }
+
+  public OutputStream getOutputStream() throws IOException {
+    return socket.getOutputStream();
+  }
+
+  public static PsqlBackendServer create(Config config) throws IOException {
+    var instance = new PsqlBackendServer(config);
     instance.createSocket();
     return instance;
   }
