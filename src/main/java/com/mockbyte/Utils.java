@@ -1,13 +1,42 @@
 package com.mockbyte;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 
 public class Utils {
 
-  private static String printBytes(byte[] bytes) {
+  public static Logger log = LoggerFactory.getLogger(Utils.class);
+
+  public static String messageHash(byte[] message) throws NoSuchAlgorithmException {
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    byte[] hash = digest.digest(message);
+    String hexHash = bytesToHex(hash);
+    return hexHash;
+  }
+
+  public static String bytesToHex(byte[] hash) {
+    StringBuilder hexString = new StringBuilder(2 * hash.length);
+    for (int i = 0; i < hash.length; i++) {
+      String hex = Integer.toHexString(0xff & hash[i]);
+      if (hex.length() == 1) {
+        hexString.append('0');
+      }
+      hexString.append(hex);
+    }
+    return hexString.toString();
+  }
+
+  public static String printBytes(byte[] bytes) {
     var hexString = new StringBuilder();
     for (byte b : bytes) {
       var ch = (char) b;
@@ -20,9 +49,10 @@ public class Utils {
     return hexString.toString();
   }
 
-  public static void printMessage(String prefix, byte[] buffer) {
-    System.out.printf("<HEX> %s%s\n", prefix, printBytes(buffer));
-    System.out.printf("<BIT> %s%s\n", prefix, Arrays.toString(buffer));
+  public static void printMessage(String prefix, byte[] buffer) throws NoSuchAlgorithmException {
+    System.out.printf("<HEX > %s%s\n", prefix, printBytes(buffer));
+    System.out.printf("<BIT > %s%s\n", prefix, Arrays.toString(buffer));
+    System.out.printf("<HASH> %s%s\n", prefix, messageHash(buffer));
     System.out.print("----------------------------------------\n\n");
   }
 
@@ -46,6 +76,11 @@ public class Utils {
       deque.removeFirst();
     }
     deque.addLast(b);
+  }
+
+  public static void recordMessage(byte[] message, String type) throws IOException {
+    var file = new File(String.format("./mkb/%s", type));
+    Files.write(file.toPath(), message);
   }
 
 }

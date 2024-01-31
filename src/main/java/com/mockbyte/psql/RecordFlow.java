@@ -8,11 +8,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
 
 import static com.mockbyte.Utils.*;
 
-public class ProxyFlow {
+public class RecordFlow {
 
   private final Logger log = LoggerFactory.getLogger(this.getClass());
   private final Config config;
@@ -23,7 +26,7 @@ public class ProxyFlow {
   private final Deque<Byte> sync = new ArrayDeque<>(SYNC.length);
   private final Deque<Byte> terminate = new ArrayDeque<>(TERMINATE.length);
 
-  private ProxyFlow(Config config) {
+  private RecordFlow(Config config) {
     this.config = config;
   }
 
@@ -93,6 +96,7 @@ public class ProxyFlow {
     var payload = new byte[authLength - header.length];
     frontendInputStream.read(payload);
     var message = joinMessage(header, payload);
+    recordMessage(message, "startup");
     backendOutputStream.write(message);
     return message;
   }
@@ -104,6 +108,7 @@ public class ProxyFlow {
     var payload = new byte[payloadLength];
     backendInputStream.read(payload);
     var message = joinMessage(header, payload);
+    recordMessage(message, "auth_req");
     frontendOutputStream.write(message);
     return message;
   }
@@ -115,11 +120,12 @@ public class ProxyFlow {
     var payload = new byte[authLength - header.length + 1];
     frontendInputStream.read(payload);
     var message = joinMessage(header, payload);
+    recordMessage(message, "auth_res");
     backendOutputStream.write(message);
     return message;
   }
 
-  public byte[] backendMessage(InputStream backendInputStream, OutputStream frontendOutputStream) throws IOException {
+  public byte[] backendMessage(InputStream backendInputStream, OutputStream frontendOutputStream, int index) throws IOException {
     int read;
     byte[] message;
     var byteList = new ArrayList<Byte>();
@@ -134,11 +140,12 @@ public class ProxyFlow {
     }
     rfq.clear();
     message = listToByte(byteList);
+    recordMessage(message, String.format("backend_message_%s", index));
     frontendOutputStream.write(message);
     return message;
   }
 
-  public byte[] frontendMessage(InputStream frontendInputStream, OutputStream backendOutputStream) throws IOException {
+  public byte[] frontendMessage(InputStream frontendInputStream, OutputStream backendOutputStream, int index) throws IOException {
     int read;
     byte[] message;
     var byteList = new ArrayList<Byte>();
@@ -153,6 +160,7 @@ public class ProxyFlow {
     }
     sync.clear();
     message = listToByte(byteList);
+    recordMessage(message, String.format("frontend_message_%s", index));
     backendOutputStream.write(message);
     return message;
   }
@@ -179,19 +187,22 @@ public class ProxyFlow {
         message = frontendAuthenticationResponse(frontendInputStream, backendOutputStream);
         printMessage("F >> ", message);
 
+        var index = 0;
         while (!isTERMINATE()) {
-          message = backendMessage(backendInputStream, frontendOutputStream);
+          index++;
+          message = backendMessage(backendInputStream, frontendOutputStream, index);
           printMessage("B << ", message);
 
-          message = frontendMessage(frontendInputStream, backendOutputStream);
+          message = frontendMessage(frontendInputStream, backendOutputStream, index);
           printMessage("F >> ", message);
         }
+        /**/
       }
     }
   }
 
   public static void create(Config config) throws IOException, NoSuchAlgorithmException {
-    var instance = new ProxyFlow(config);
+    var instance = new RecordFlow(config);
     try (
       var frontendServer = FrontendServer.create(config)
     ) {
